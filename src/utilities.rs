@@ -40,6 +40,32 @@ pub fn buf_from_os(os: &OsStr) -> Vec<u16> {
     buf
 }
 
+/// Check whether a given bitfield has a particular bit set
+///
+/// ```
+/// use windows_permissions::utilities::has_bit;
+///
+/// let a = 0x01;
+/// let b = 0x02;
+/// let c = 0x04;
+///
+/// let abc = a | b | c;
+/// let ab = a | b;
+///
+/// assert!(has_bit(abc, a));
+/// assert!(has_bit(abc, b));
+/// assert!(has_bit(abc, c));
+///
+/// assert!(has_bit(ab, a));
+/// assert!(has_bit(ab, b));
+/// assert!(!has_bit(ab, c));
+///
+/// assert!(!has_bit(0x00, a));
+/// ```
+pub fn has_bit(field: u32, bit: u32) -> bool {
+    field & bit != 0
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
