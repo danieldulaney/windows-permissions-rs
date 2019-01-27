@@ -21,7 +21,7 @@ mod sid {
         /// - `ptr` points to a valid SID
         /// - `_lifetime` lives at least as long as `ptr`
         pub unsafe fn from_nonnull<T>(ptr: NonNull<SID>, _lifetime: &T) -> &Sid {
-            std::mem::transmute(ptr)
+            &*(ptr.as_ptr() as *mut Sid)
         }
     }
 
