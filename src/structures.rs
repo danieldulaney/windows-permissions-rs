@@ -2,12 +2,9 @@ pub use sd::SecurityDescriptor;
 pub use sid::{Sid, SidRef};
 
 mod sid {
-    use std::any::Any;
-    use std::borrow::BorrowMut;
-    use std::marker::PhantomData;
     use std::ptr::NonNull;
 
-    use winapi::um::winnt::{PSID, SID};
+    use winapi::um::winnt::SID;
 
     #[repr(C)]
     pub struct Sid(SID);
@@ -44,7 +41,6 @@ mod sid {
 }
 
 mod sd {
-    use std::mem::transmute;
     use std::ptr::NonNull;
     use winapi::um::winnt::{ACL, PACL, PSECURITY_DESCRIPTOR, PSID, SECURITY_DESCRIPTOR, SID};
 
