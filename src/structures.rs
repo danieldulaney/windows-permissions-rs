@@ -108,4 +108,11 @@ mod sd {
                 .map(|p| unsafe { Sid::from_nonnull(p, self) })
         }
     }
+
+    impl Drop for SecurityDescriptor {
+        fn drop(&mut self) {
+            let result = unsafe { winapi::um::winbase::LocalFree(self.sd.as_ptr() as *mut _) };
+            assert!(result.is_null());
+        }
+    }
 }
