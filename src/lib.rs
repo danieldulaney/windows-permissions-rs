@@ -1,4 +1,5 @@
 extern crate winapi;
+extern crate windows_error;
 
 pub mod structures;
 pub mod utilities;

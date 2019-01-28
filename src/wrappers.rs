@@ -5,11 +5,17 @@ pub mod get_named_security_info {
     use crate::SecurityDescriptor;
     use std::ffi::OsStr;
     use std::ptr::null_mut;
+    use winapi::shared::winerror::ERROR_SUCCESS;
     use winapi::um::winnt::{self, PACL, PSECURITY_DESCRIPTOR, PSID};
+    use windows_error::WindowsError;
 
     /// Wraps GetNamedSecurityInfoW
     #[allow(non_snake_case)]
-    pub fn GetNamedSecurityInfo(name: &OsStr, obj_type: u32, sec_info: u32) -> SecurityDescriptor {
+    pub fn GetNamedSecurityInfo(
+        name: &OsStr,
+        obj_type: u32,
+        sec_info: u32,
+    ) -> Result<SecurityDescriptor, WindowsError> {
         let name = buf_from_os(name);
 
         let mut owner: PSID = null_mut();
@@ -18,7 +24,7 @@ pub mod get_named_security_info {
         let mut sacl: PACL = null_mut();
         let mut sd: PSECURITY_DESCRIPTOR = null_mut();
 
-        let result = unsafe {
+        let result: WindowsError = unsafe {
             winapi::um::aclapi::GetNamedSecurityInfoW(
                 name.as_ptr(),
                 obj_type,
@@ -29,9 +35,12 @@ pub mod get_named_security_info {
                 &mut sacl,
                 &mut sd,
             )
-        };
+        }
+        .into();
 
-        assert!(!sd.is_null());
+        if result != ERROR_SUCCESS {
+            return Err(result);
+        }
 
         let owner = if has_bit(sec_info, winnt::OWNER_SECURITY_INFORMATION) {
             owner
@@ -57,6 +66,6 @@ pub mod get_named_security_info {
             null_mut()
         };
 
-        unsafe { SecurityDescriptor::from_raw(sd, owner, group, dacl, sacl) }
+        Ok(unsafe { SecurityDescriptor::from_raw(sd, owner, group, dacl, sacl) })
     }
 }
