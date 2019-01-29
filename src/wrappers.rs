@@ -1,6 +1,57 @@
 pub use get_named_security_info::GetNamedSecurityInfo;
+pub use lookup_account_sid::LookupAccountSid;
 
-pub mod get_named_security_info {
+const BUFFER_SIZE: u32 = 256;
+
+mod lookup_account_sid {
+    use super::BUFFER_SIZE;
+    use crate::utilities::os_from_buf;
+    use crate::Sid;
+    use std::ffi::OsString;
+    use std::ptr::{null, null_mut};
+    use windows_error::WindowsError;
+
+    /// Wraps LookupAccountSidW
+    ///
+    /// Returns (name, domain)
+    pub fn LookupAccountSid(sid: &mut Sid) -> Result<(OsString, OsString), WindowsError> {
+        let mut name_size = BUFFER_SIZE;
+        let mut dom_size = BUFFER_SIZE;
+
+        loop {
+            let old_name_size = name_size;
+            let old_dom_size = dom_size;
+
+            let mut name: Vec<u16> = vec![0; name_size as usize];
+            let mut dom: Vec<u16> = vec![0; dom_size as usize];
+
+            let result = unsafe {
+                winapi::um::winbase::LookupAccountSidW(
+                    null(),
+                    sid as *mut Sid as *mut _,
+                    name.as_mut_ptr(),
+                    &mut name_size,
+                    dom.as_mut_ptr(),
+                    &mut dom_size,
+                    null_mut(),
+                )
+            };
+
+            if result != 0 {
+                // Success: Return the filled buffers as OsStrings
+                return Ok((os_from_buf(&name), os_from_buf(&dom)));
+            } else if name_size != old_name_size || dom_size != old_dom_size {
+                // Failed, but requests new allocation: try again
+                continue;
+            } else {
+                // Failed, with no new allocation request
+                return Err(WindowsError::from_last_err());
+            }
+        }
+    }
+}
+
+mod get_named_security_info {
     use crate::utilities::{buf_from_os, has_bit};
     use crate::SecurityDescriptor;
     use std::ffi::OsStr;
