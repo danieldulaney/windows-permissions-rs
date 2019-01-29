@@ -10,7 +10,7 @@ const BUFFER_SIZE: u32 = 256;
 ///
 /// Returns (name, domain)
 #[allow(non_snake_case)]
-pub fn LookupAccountSid(sid: &mut Sid) -> Result<(OsString, OsString), WindowsError> {
+pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), WindowsError> {
     let mut name_size = BUFFER_SIZE;
     let mut dom_size = BUFFER_SIZE;
 
@@ -24,7 +24,7 @@ pub fn LookupAccountSid(sid: &mut Sid) -> Result<(OsString, OsString), WindowsEr
         let result = unsafe {
             winapi::um::winbase::LookupAccountSidW(
                 null(),
-                sid as *mut Sid as *mut _,
+                sid as *const Sid as *mut _,
                 name.as_mut_ptr(),
                 &mut name_size,
                 dom.as_mut_ptr(),
