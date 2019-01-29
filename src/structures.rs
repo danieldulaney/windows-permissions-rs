@@ -4,6 +4,7 @@ pub use sid::Sid;
 mod sid {
     use crate::wrappers;
     use std::ptr::NonNull;
+    use std::fmt;
     use winapi::um::winnt::SID;
 
     #[repr(C)]
@@ -19,6 +20,17 @@ mod sid {
         /// - `_lifetime` lives at least as long as `ptr`
         pub unsafe fn from_nonnull<T>(ptr: NonNull<SID>, _lifetime: &T) -> &Sid {
             &*(ptr.as_ptr() as *mut Sid)
+        }
+    }
+
+    impl fmt::Debug for Sid {
+        fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+            fmt.debug_map()
+                .entry(&"rev", &self.0.Revision)
+                .entry(&"sub_auth_count", &self.0.SubAuthorityCount)
+                .entry(&"id_auth", &self.0.IdentifierAuthority.Value)
+                .entry(&"sub_auth", &self.0.SubAuthority)
+                .finish()
         }
     }
 
