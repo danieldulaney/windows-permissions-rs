@@ -40,6 +40,42 @@ pub fn buf_from_os(os: &OsStr) -> Vec<u16> {
     buf
 }
 
+/// Unsafely hunt through memory until an item is found
+///
+/// This is mostly used when a WinAPI function allocates a nul-terminated
+/// buffer of `u16`s. Use this to find the location of the nul, then use
+/// `std::slice::from_raw_parts` to build a slice.
+///
+/// ## Assumptions
+///
+/// This function assumes that:
+/// - `haystack` points to an aligned buffer of `T`s
+/// - There is a `needle` somewhere in `haystack`
+/// - Every value in `haystack` can be dereferenced
+///
+/// ```
+/// use windows_permissions::utilities::{search_buffer, buf_from_os};
+/// use std::ffi::OsString;
+///
+/// let items = ['H' as u16, 'e' as u16, 'l' as u16, 'l' as u16, 'o' as u16, 0x00, 0xBA, 0xDD];
+/// let ptr = items.as_ptr();
+///
+/// let position = unsafe { search_buffer(&0x00, ptr) };
+/// let valid_items = unsafe { std::slice::from_raw_parts(ptr, position + 1) };
+///
+/// assert_eq!(position, 5);
+/// assert_eq!(valid_items, &buf_from_os(&OsString::from("Hello"))[..]);
+/// ```
+pub unsafe fn search_buffer<T: PartialEq>(needle: &T, haystack: *const T) -> usize {
+    let mut position = 0usize;
+
+    while *haystack.offset(position as isize) != *needle {
+        position += 1;
+    }
+
+    position
+}
+
 /// Check whether a given bitfield has a particular bit set
 ///
 /// ```
