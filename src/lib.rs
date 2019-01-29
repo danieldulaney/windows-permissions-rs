@@ -3,7 +3,7 @@ extern crate windows_error;
 
 pub mod structures;
 pub mod utilities;
-mod wrappers;
+pub mod wrappers;
 
 pub use structures::{SecurityDescriptor, Sid};
 
