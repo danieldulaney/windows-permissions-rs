@@ -3,8 +3,8 @@ pub use sid::Sid;
 
 mod sid {
     use crate::wrappers;
-    use std::ptr::NonNull;
     use std::fmt;
+    use std::ptr::NonNull;
     use winapi::um::winnt::SID;
 
     #[repr(C)]
