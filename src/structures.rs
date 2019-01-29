@@ -2,8 +2,8 @@ pub use sd::SecurityDescriptor;
 pub use sid::Sid;
 
 mod sid {
+    use crate::wrappers;
     use std::ptr::NonNull;
-
     use winapi::um::winnt::SID;
 
     #[repr(C)]
@@ -19,6 +19,12 @@ mod sid {
         /// - `_lifetime` lives at least as long as `ptr`
         pub unsafe fn from_nonnull<T>(ptr: NonNull<SID>, _lifetime: &T) -> &Sid {
             &*(ptr.as_ptr() as *mut Sid)
+        }
+    }
+
+    impl PartialEq for Sid {
+        fn eq(&self, other: &Sid) -> bool {
+            wrappers::EqualSid(self, other)
         }
     }
 }
