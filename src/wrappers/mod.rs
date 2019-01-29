@@ -6,9 +6,11 @@
 //! implement the other functionality in this crate.
 
 mod create_well_known_sid;
+mod equal_sid;
 mod get_named_security_info;
 mod lookup_account_sid;
 
 pub use create_well_known_sid::CreateWellKnownSid;
+pub use equal_sid::EqualSid;
 pub use get_named_security_info::GetNamedSecurityInfo;
 pub use lookup_account_sid::LookupAccountSid;
