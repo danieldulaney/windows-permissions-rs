@@ -5,26 +5,33 @@
 //! These functions wrap the unsafe calls in safe objects, and are used to
 //! implement the other functionality in this crate.
 
+// Implementation note
+//
+// This file only contains integration tests. New wrappers should be added as
+// additional sub-modules. If they can be tested in isolation, include that
+// test code in those sub-modules. However, tests that require multiple
+// wrapped calls should be placed here.
+
+mod convert_sid_to_string_sid;
 mod create_well_known_sid;
 mod equal_sid;
 mod get_named_security_info;
 mod lookup_account_sid;
-mod convert_sid_to_string_sid;
 
+pub use convert_sid_to_string_sid::ConvertSidToStringSid;
 pub use create_well_known_sid::CreateWellKnownSid;
 pub use equal_sid::EqualSid;
 pub use get_named_security_info::GetNamedSecurityInfo;
 pub use lookup_account_sid::LookupAccountSid;
-pub use convert_sid_to_string_sid::ConvertSidToStringSid;
 
 #[cfg(test)]
 mod test {
     use super::*;
 
-    use std::path::Path;
     use std::ffi::OsString;
-    use winapi::um::winnt::{self, WinLocalSid, WinWorldSid};
+    use std::path::Path;
     use winapi::um::accctrl::SE_FILE_OBJECT;
+    use winapi::um::winnt::{self, WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
 
     const SEC_INFO: u32 = winnt::OWNER_SECURITY_INFORMATION
         | winnt::GROUP_SECURITY_INFORMATION
@@ -47,9 +54,20 @@ mod test {
     fn well_known_sids_stringify() {
         let world_sid = CreateWellKnownSid(WinWorldSid).unwrap();
         let local_sid = CreateWellKnownSid(WinLocalSid).unwrap();
+        let fancy_sid = CreateWellKnownSid(WinCapabilityMusicLibrarySid).unwrap();
 
-        assert_eq!(ConvertSidToStringSid(&world_sid), Ok(OsString::from("S-1-1-0")));
-        assert_eq!(ConvertSidToStringSid(&local_sid), Ok(OsString::from("S-1-2-0")));
+        assert_eq!(
+            ConvertSidToStringSid(&world_sid),
+            Ok(OsString::from("S-1-1-0"))
+        );
+        assert_eq!(
+            ConvertSidToStringSid(&local_sid),
+            Ok(OsString::from("S-1-2-0"))
+        );
+        assert_eq!(
+            ConvertSidToStringSid(&fancy_sid),
+            Ok(OsString::from("S-1-15-3-6"))
+        );
     }
 
     #[test]
@@ -57,7 +75,8 @@ mod test {
         let cargo_toml_path =
             Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml");
 
-        let sd = GetNamedSecurityInfo(cargo_toml_path.as_os_str(), SE_FILE_OBJECT, SEC_INFO).unwrap();
+        let sd =
+            GetNamedSecurityInfo(cargo_toml_path.as_os_str(), SE_FILE_OBJECT, SEC_INFO).unwrap();
 
         assert!(sd.owner().is_some());
         assert!(sd.group().is_some());

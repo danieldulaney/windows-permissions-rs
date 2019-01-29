@@ -8,7 +8,13 @@ mod sid {
     use winapi::um::winnt::SID;
 
     #[repr(C)]
-    pub struct Sid(SID);
+    #[allow(non_snake_case)]
+    pub struct Sid {
+        Revision: u8,
+        SubAuthorityCount: u8,
+        IdentifierAuthority: [u8; 6],
+        SubAuthority: [u32; 8],
+    }
 
     impl Sid {
         /// Get `&Sid` from a `NonNull<SID>`
@@ -26,19 +32,23 @@ mod sid {
     impl fmt::Debug for Sid {
         fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
             fmt.debug_map()
-                .entry(&"rev", &self.0.Revision)
-                .entry(&"sub_auth_count", &self.0.SubAuthorityCount)
-                .entry(&"id_auth", &self.0.IdentifierAuthority.Value)
-                .entry(&"sub_auth", &self.0.SubAuthority)
+                .entry(&"rev", &self.Revision)
+                .entry(&"sub_auth_count", &self.SubAuthorityCount)
+                .entry(&"id_auth", &self.IdentifierAuthority)
+                .entry(&"sub_auth", &self.SubAuthority)
                 .finish()
         }
     }
 
     impl fmt::Display for Sid {
         fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-            write!(fmt, "{}", wrappers::ConvertSidToStringSid(&self)
-                .expect("Passed a safe Sid to ConvertSidToStringSid but got an error")
-                .to_string_lossy())
+            write!(
+                fmt,
+                "{}",
+                wrappers::ConvertSidToStringSid(&self)
+                    .expect("Passed a safe Sid to ConvertSidToStringSid but got an error")
+                    .to_string_lossy()
+            )
         }
     }
 
