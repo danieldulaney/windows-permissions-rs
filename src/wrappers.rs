@@ -1,7 +1,46 @@
+//! Direct wrappers over WinAPI calls
+//!
+//! Generally, it's better to use the other methods in this crate. However, it
+//! can sometimes be useful to drop straight down into the raw WinAPI calls.
+//! These functions wrap the unsafe calls in safe objects, and are used to
+//! implement the other functionality in this crate.
+
 pub use get_named_security_info::GetNamedSecurityInfo;
 pub use lookup_account_sid::LookupAccountSid;
+pub use create_well_known_sid::CreateWellKnownSid;
 
 const BUFFER_SIZE: u32 = 256;
+
+mod create_well_known_sid {
+    use crate::Sid;
+    use std::mem::{size_of, zeroed};
+    use std::ptr::null_mut;
+    use windows_error::WindowsError;
+
+    /// Wraps CreateWellKnownSid
+    #[allow(non_snake_case)]
+    pub fn CreateWellKnownSid(sid_type: u32) -> Result<Sid, WindowsError> {
+        let mut sid: Sid;
+        let mut size = size_of::<Sid>() as u32;
+
+        let result = unsafe {
+            sid = zeroed();
+
+            winapi::um::securitybaseapi::CreateWellKnownSid(
+                sid_type,
+                null_mut(),
+                &mut sid as *mut _ as *mut _,
+                &mut size,
+                )
+        };
+
+        if result != 0 {
+            Ok(sid)
+        } else {
+            Err(WindowsError::from_last_err())
+        }
+    }
+}
 
 mod lookup_account_sid {
     use super::BUFFER_SIZE;
@@ -14,6 +53,7 @@ mod lookup_account_sid {
     /// Wraps LookupAccountSidW
     ///
     /// Returns (name, domain)
+    #[allow(non_snake_case)]
     pub fn LookupAccountSid(sid: &mut Sid) -> Result<(OsString, OsString), WindowsError> {
         let mut name_size = BUFFER_SIZE;
         let mut dom_size = BUFFER_SIZE;
