@@ -34,6 +34,14 @@ mod sid {
         }
     }
 
+    impl fmt::Display for Sid {
+        fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+            write!(fmt, "{}", wrappers::ConvertSidToStringSid(&self)
+                .expect("Passed a safe Sid to ConvertSidToStringSid but got an error")
+                .to_string_lossy())
+        }
+    }
+
     impl PartialEq for Sid {
         fn eq(&self, other: &Sid) -> bool {
             wrappers::EqualSid(self, other)
