@@ -1,5 +1,5 @@
 pub use sd::SecurityDescriptor;
-pub use sid::{Sid, SidRef};
+pub use sid::Sid;
 
 mod sid {
     use std::ptr::NonNull;
@@ -21,23 +21,6 @@ mod sid {
             &*(ptr.as_ptr() as *mut Sid)
         }
     }
-
-    /*
-    impl Borrow<SidRef> for Sid {
-        fn borrow(&self) -> &SidRef {
-            &SidRef(NonNull::new_unchecked(&self))
-        }
-    }
-
-    impl BorrowMut<SidRef> for Sid {
-        fn borrow_mut(&mut self) -> &mut SidRef {
-            &mut SidRef(NonNull::new_unchecked(&mut self))
-        }
-    }
-    */
-
-    #[derive(Debug, Clone, Copy)]
-    pub struct SidRef(NonNull<Sid>);
 }
 
 mod sd {
