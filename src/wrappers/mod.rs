@@ -78,10 +78,10 @@ mod test {
 
     #[test]
     fn well_known_sids_are_equal() {
-        let world_sid_1 = CreateWellKnownSid(WinWorldSid).unwrap();
-        let world_sid_2 = CreateWellKnownSid(WinWorldSid).unwrap();
-        let local_sid_1 = CreateWellKnownSid(WinLocalSid).unwrap();
-        let local_sid_2 = CreateWellKnownSid(WinLocalSid).unwrap();
+        let world_sid_1 = CreateWellKnownSid(WinWorldSid, None).unwrap();
+        let world_sid_2 = CreateWellKnownSid(WinWorldSid, None).unwrap();
+        let local_sid_1 = CreateWellKnownSid(WinLocalSid, None).unwrap();
+        let local_sid_2 = CreateWellKnownSid(WinLocalSid, None).unwrap();
 
         assert!(EqualSid(&world_sid_1, &world_sid_2));
         assert!(EqualSid(&local_sid_1, &local_sid_2));
@@ -91,38 +91,21 @@ mod test {
 
     #[test]
     fn well_known_sids_stringify() {
-        let world_sid = CreateWellKnownSid(WinWorldSid).unwrap();
-        let local_sid = CreateWellKnownSid(WinLocalSid).unwrap();
-        let fancy_sid = CreateWellKnownSid(WinCapabilityMusicLibrarySid).unwrap();
+        let world_sid = CreateWellKnownSid(WinWorldSid, None).unwrap();
+        let local_sid = CreateWellKnownSid(WinLocalSid, None).unwrap();
+        let fancy_sid = CreateWellKnownSid(WinCapabilityMusicLibrarySid, None).unwrap();
 
         assert_eq!(
-            ConvertSidToStringSid(&world_sid),
-            Ok(OsString::from("S-1-1-0"))
+            ConvertSidToStringSid(&world_sid).unwrap(),
+            OsString::from("S-1-1-0")
         );
         assert_eq!(
-            ConvertSidToStringSid(&local_sid),
-            Ok(OsString::from("S-1-2-0"))
+            ConvertSidToStringSid(&local_sid).unwrap(),
+            OsString::from("S-1-2-0")
         );
         assert_eq!(
-            ConvertSidToStringSid(&fancy_sid),
-            Ok(OsString::from("S-1-15-3-6"))
+            ConvertSidToStringSid(&fancy_sid).unwrap(),
+            OsString::from("S-1-15-3-6")
         );
-    }
-
-    //#[test]
-    fn cargo_toml_is_owned() {
-        let cargo_toml_path =
-            Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml");
-
-        let sd =
-            GetNamedSecurityInfo(cargo_toml_path.as_os_str(), SE_FILE_OBJECT, SEC_INFO).unwrap();
-
-        assert!(sd.owner().is_some());
-        assert!(sd.group().is_some());
-
-        dbg!(sd.owner().unwrap());
-        dbg!(sd.group().unwrap());
-
-        panic!();
     }
 }

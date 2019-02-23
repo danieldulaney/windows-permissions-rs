@@ -4,10 +4,15 @@ use std::mem::{size_of, zeroed};
 use std::ptr::{null_mut, NonNull};
 
 /// Wraps CreateWellKnownSid
+///
+/// Currently only supports creating SIDs with up to 8 subauthorities; longer
+/// SIDs will give an OS error (code 122).
+///
+/// If `domain_sid` is omitted, this has the same behavior as the underlying
+/// WinAPI function.
 #[allow(non_snake_case)]
-pub fn CreateWellKnownSid(sid_type: u32) -> Result<Sid, io::Error> {
+pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid, io::Error> {
     // Optimistically reserve enough space for a fairly large SID
-    // TODO: Benchmark to determine the best size here
     let mut sid_len = wrappers::GetSidLengthRequired(8) as u32;
 
     // Assumptions:

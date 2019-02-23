@@ -1,20 +1,20 @@
 use crate::utilities;
 use crate::Sid;
+use std::io;
 use std::ffi::OsString;
 use std::ptr::null_mut;
-use windows_error::WindowsError;
 
 /// Wraps ConvertSidtoStringSidW
 #[allow(non_snake_case)]
-pub fn ConvertSidToStringSid(sid: &Sid) -> Result<OsString, WindowsError> {
+pub fn ConvertSidToStringSid(sid: &Sid) -> Result<OsString, io::Error> {
     let mut buf_ptr: *mut u16 = null_mut();
     let result = unsafe {
-        winapi::shared::sddl::ConvertSidToStringSidW(sid as *const _ as *mut _, &mut buf_ptr)
+        winapi::shared::sddl::ConvertSidToStringSidW(sid.as_ptr() as *mut _, &mut buf_ptr)
     };
 
     if result == 0 {
-        // Failed
-        Err(WindowsError::from_last_err())
+        // Failed! No need to clean up
+        Err(io::Error::last_os_error())
     } else {
         // Success! Copy the string into an OsString and free the original buffer
         let nul_pos = unsafe { utilities::search_buffer(&0x00, buf_ptr) };
