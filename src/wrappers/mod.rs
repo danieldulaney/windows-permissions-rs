@@ -12,23 +12,37 @@
 // test code in those sub-modules. However, tests that require multiple
 // wrapped calls should be placed here.
 
+mod allocate_and_initialize_sid;
 mod convert_sid_to_string_sid;
+mod convert_string_sid_to_sid;
 mod create_well_known_sid;
 mod equal_sid;
 mod get_named_security_info;
+mod get_sid_identifier_authority;
+mod get_sid_length_required;
+mod get_sid_sub_authority;
+mod get_sid_sub_authority_count;
+mod is_valid_sid;
 mod lookup_account_sid;
 
+pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
 pub use convert_sid_to_string_sid::ConvertSidToStringSid;
+pub use convert_string_sid_to_sid::ConvertStringSidToSid;
 pub use create_well_known_sid::CreateWellKnownSid;
 pub use equal_sid::EqualSid;
 pub use get_named_security_info::GetNamedSecurityInfo;
+pub use get_sid_identifier_authority::GetSidIdentifierAuthority;
+pub use get_sid_length_required::GetSidLengthRequired;
+pub use get_sid_sub_authority::{GetSidSubAuthority, GetSidSubAuthorityChecked};
+pub use get_sid_sub_authority_count::GetSidSubAuthorityCount;
+pub use is_valid_sid::IsValidSid;
 pub use lookup_account_sid::LookupAccountSid;
 
 #[cfg(test)]
 mod test {
     use super::*;
 
-    use std::ffi::OsString;
+    use std::ffi::{OsStr, OsString};
     use std::path::Path;
     use winapi::um::accctrl::SE_FILE_OBJECT;
     use winapi::um::winnt::{self, WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
@@ -36,6 +50,31 @@ mod test {
     const SEC_INFO: u32 = winnt::OWNER_SECURITY_INFORMATION
         | winnt::GROUP_SECURITY_INFORMATION
         | winnt::DACL_SECURITY_INFORMATION;
+
+    #[test]
+    fn construct_and_read_sids() {
+        let id_auth: [u8; 6] = [1, 2, 3, 4, 5, 6];
+        let sub_auths_full = [20u32, 19, 18, 17, 16, 15, 14, 13];
+
+        for length in 0..=sub_auths_full.len() {
+            dbg!(length);
+
+            let sub_auths = &sub_auths_full[..length];
+
+            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths[..]).unwrap();
+
+            assert_eq!(&id_auth, GetSidIdentifierAuthority(&sid));
+            assert_eq!(sub_auths.len() as u8, GetSidSubAuthorityCount(&sid));
+
+            for index in 0..sub_auths.len() {
+                dbg!(index);
+                assert_eq!(
+                    Some(sub_auths[index]),
+                    GetSidSubAuthorityChecked(&sid, index as u8)
+                );
+            }
+        }
+    }
 
     #[test]
     fn well_known_sids_are_equal() {
@@ -70,7 +109,7 @@ mod test {
         );
     }
 
-    #[test]
+    //#[test]
     fn cargo_toml_is_owned() {
         let cargo_toml_path =
             Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml");
@@ -80,5 +119,10 @@ mod test {
 
         assert!(sd.owner().is_some());
         assert!(sd.group().is_some());
+
+        dbg!(sd.owner().unwrap());
+        dbg!(sd.group().unwrap());
+
+        panic!();
     }
 }
