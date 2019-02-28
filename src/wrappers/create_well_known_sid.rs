@@ -28,13 +28,18 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid
     // At this point, the memory was allocated -- it *must* be freed
 
     let result = unsafe {
-        winapi::um::securitybaseapi::CreateWellKnownSid(sid_type, null_mut(), sid_ptr.as_ptr(), &mut sid_len)
+        winapi::um::securitybaseapi::CreateWellKnownSid(
+            sid_type,
+            null_mut(),
+            sid_ptr.as_ptr(),
+            &mut sid_len,
+        )
     };
 
     if result != 0 {
         // Success! The SID was initialized and should be returned
         // Cleanup for the allocation will be performed when the Sid is Drop'd
-        return Ok( unsafe { Sid::owned_from_nonnull(sid_ptr) } );
+        return Ok(unsafe { Sid::owned_from_nonnull(sid_ptr) });
     } else {
         // Failure! Save off the error, free the buffer, and figure out what to do
 

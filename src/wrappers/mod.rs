@@ -44,35 +44,46 @@ mod test {
 
     use std::ffi::{OsStr, OsString};
     use std::path::Path;
-    use winapi::um::accctrl::SE_FILE_OBJECT;
     use winapi::um::winnt::{self, WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
-
-    const SEC_INFO: u32 = winnt::OWNER_SECURITY_INFORMATION
-        | winnt::GROUP_SECURITY_INFORMATION
-        | winnt::DACL_SECURITY_INFORMATION;
 
     #[test]
     fn construct_and_read_sids() {
-        let id_auth: [u8; 6] = [1, 2, 3, 4, 5, 6];
+        let id_auth = [0xBAu8, 0xD5, 0x1D, 0xBA, 0xD5, 0x1D];
         let sub_auths_full = [20u32, 19, 18, 17, 16, 15, 14, 13];
 
-        for length in 0..=sub_auths_full.len() {
-            dbg!(length);
-
+        for length in 1..=sub_auths_full.len() {
             let sub_auths = &sub_auths_full[..length];
 
-            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths[..]).unwrap();
+            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths).unwrap();
 
             assert_eq!(&id_auth, GetSidIdentifierAuthority(&sid));
             assert_eq!(sub_auths.len() as u8, GetSidSubAuthorityCount(&sid));
 
             for index in 0..sub_auths.len() {
-                dbg!(index);
                 assert_eq!(
                     Some(sub_auths[index]),
                     GetSidSubAuthorityChecked(&sid, index as u8)
                 );
             }
+        }
+    }
+
+    #[test]
+    fn constructed_sids_string_roundtrip() {
+        let id_auth = [0xBAu8, 0xD5, 0x1D, 0xBA, 0xD5, 0x1D];
+        let sub_auths_full = [0u32, 1, 2, 3, 4, 5, 6, 7];
+
+        for length in 1..=sub_auths_full.len() {
+            let sub_auths = &sub_auths_full[..length];
+
+            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths).unwrap();
+            let string_sid = ConvertSidToStringSid(&sid).unwrap();
+
+            let sid_rt = ConvertStringSidToSid(&string_sid);
+
+            let sid_rt = sid_rt.unwrap();
+
+            assert!(EqualSid(&sid, &sid_rt));
         }
     }
 

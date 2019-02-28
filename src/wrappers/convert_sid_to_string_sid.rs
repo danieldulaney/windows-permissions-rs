@@ -1,7 +1,7 @@
 use crate::utilities;
 use crate::Sid;
-use std::io;
 use std::ffi::OsString;
+use std::io;
 use std::ptr::null_mut;
 
 /// Wraps ConvertSidtoStringSidW

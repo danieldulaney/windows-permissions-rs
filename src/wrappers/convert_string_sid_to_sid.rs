@@ -1,14 +1,22 @@
 use crate::utilities::buf_from_os;
 use crate::Sid;
 use std::ffi::OsStr;
+use std::io;
 use std::ptr::{null_mut, NonNull};
-use windows_error::WindowsError;
 
 /// Wraps ConvertStringSidToSidW
+///
+/// # Panics
+///
+/// Panics if the underlying WinAPI call reports success but returns a null
+/// pointer. This should never happen.
 #[allow(non_snake_case)]
-pub fn ConvertStringSidToSid(string: &OsStr) -> Result<Sid, WindowsError> {
+pub fn ConvertStringSidToSid(string: &OsStr) -> Result<Sid, io::Error> {
     let buf = buf_from_os(string);
     let mut ptr = null_mut();
+
+    dbg!(&string);
+    dbg!(&buf);
 
     let result = unsafe { winapi::shared::sddl::ConvertStringSidToSidW(buf.as_ptr(), &mut ptr) };
 
@@ -22,6 +30,6 @@ pub fn ConvertStringSidToSid(string: &OsStr) -> Result<Sid, WindowsError> {
         })
     } else {
         // Failure
-        Err(WindowsError::from_last_err())
+        Err(io::Error::last_os_error())
     }
 }

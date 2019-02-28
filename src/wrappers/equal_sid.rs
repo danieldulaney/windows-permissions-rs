@@ -7,9 +7,6 @@ use crate::Sid;
 #[allow(non_snake_case)]
 pub fn EqualSid(sid1: &Sid, sid2: &Sid) -> bool {
     (unsafe {
-        winapi::um::securitybaseapi::EqualSid(
-            sid1.as_ptr() as *mut _,
-            sid2.as_ptr() as *mut _,
-        )
+        winapi::um::securitybaseapi::EqualSid(sid1.as_ptr() as *mut _, sid2.as_ptr() as *mut _)
     } != 0)
 }
