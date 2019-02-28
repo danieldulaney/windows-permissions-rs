@@ -88,6 +88,23 @@ mod test {
     }
 
     #[test]
+    fn constructed_sids_are_valid() {
+        use std::ptr::null_mut;
+        use crate::Sid;
+
+        let id_auth = [0x00u8, 0x00, 0x0C, 0x00, 0x15, 0x1D];
+        let sub_auths_full = [0u32, 1, 2, 3, 4, 5, 6, 7];
+
+        for length in 1..=sub_auths_full.len() {
+            let sub_auths = &sub_auths_full[..length];
+
+            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths).unwrap();
+
+            assert!(IsValidSid(&sid).is_ok());
+        }
+    }
+
+    #[test]
     fn well_known_sids_are_equal() {
         let world_sid_1 = CreateWellKnownSid(WinWorldSid, None).unwrap();
         let world_sid_2 = CreateWellKnownSid(WinWorldSid, None).unwrap();
