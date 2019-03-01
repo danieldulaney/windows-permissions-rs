@@ -130,7 +130,7 @@ mod sid {
 mod sd {
     use std::ptr::NonNull;
     use winapi::ctypes::c_void;
-    use winapi::um::winnt::{ACL, PACL, PSECURITY_DESCRIPTOR, PSID, SECURITY_DESCRIPTOR, SID};
+    use winapi::um::winnt::{ACL, PACL, PSECURITY_DESCRIPTOR, PSID, SECURITY_DESCRIPTOR};
 
     use super::sid::Sid;
 

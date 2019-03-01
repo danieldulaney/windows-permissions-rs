@@ -42,9 +42,8 @@ pub use lookup_account_sid::LookupAccountSid;
 mod test {
     use super::*;
 
-    use std::ffi::{OsStr, OsString};
-    use std::path::Path;
-    use winapi::um::winnt::{self, WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
+    use std::ffi::OsString;
+    use winapi::um::winnt::{WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
 
     #[test]
     fn construct_and_read_sids() {
@@ -89,9 +88,6 @@ mod test {
 
     #[test]
     fn constructed_sids_are_valid() {
-        use std::ptr::null_mut;
-        use crate::Sid;
-
         let id_auth = [0x00u8, 0x00, 0x0C, 0x00, 0x15, 0x1D];
         let sub_auths_full = [0u32, 1, 2, 3, 4, 5, 6, 7];
 

@@ -1,6 +1,5 @@
 use crate::{wrappers, Sid};
 use std::io;
-use std::mem::{size_of, zeroed};
 use std::ptr::{null_mut, NonNull};
 
 /// Wraps CreateWellKnownSid
@@ -30,7 +29,7 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid
     let result = unsafe {
         winapi::um::securitybaseapi::CreateWellKnownSid(
             sid_type,
-            null_mut(),
+            domain_sid.map(|s| s.as_ptr() as *mut _).unwrap_or(null_mut()),
             sid_ptr.as_ptr(),
             &mut sid_len,
         )
