@@ -4,6 +4,7 @@ pub use sid::Sid;
 mod sid {
     use crate::wrappers;
     use std::fmt;
+    use std::io;
     use std::ptr::NonNull;
     use winapi::ctypes::c_void;
 
@@ -43,7 +44,7 @@ mod sid {
         /// ## Requirements
         ///
         /// The `NonNull` pointer *must* have been allocated with
-        /// `AllocateAndInitializeSid`. When the resulting `Sid` is dropped, it
+        /// a Windows API call. When the resulting `Sid` is dropped, it
         /// will be dropped with `LocalFree`.
         pub unsafe fn owned_from_nonnull(ptr: NonNull<c_void>) -> Sid {
             // Future maintainers:
@@ -54,34 +55,22 @@ mod sid {
             Sid(ptr)
         }
 
-        /// Create a new `Sid` with the given number of SubAuthorities
+        /// Create a new `Sid`
         ///
-        /// By default the SID will have all identifier authorities and
-        /// subauthorities set to 0.
-        ///
-        /// ## Panics
-        ///
-        /// Panics if the underlying call to `AllocateAndInitializeSid` fails.
-        /// This can happen if the system is out of memory.
-        pub fn new(auth_count: u8) -> Sid {
-            let auths = vec![0; auth_count as usize];
-            let id_auth: [u8; 6] = [0, 0, 0, 0, 0, 0];
-
-            match wrappers::AllocateAndInitializeSid(id_auth, &auths) {
-                Ok(s) => s,
-                Err(e) => panic!("Could not allocate SID, {}", e),
-            }
+        /// `id_auth` will be the identifier authority, `sub_auths` will be the
+        /// sub-authorities. There must be between 1 and 8 sub-authorities.
+        pub fn new(id_auth: [u8; 6], sub_auths: &[u32]) -> Result<Sid, io::Error> {
+            let sid = wrappers::AllocateAndInitializeSid(id_auth, sub_auths)?;
+            wrappers::IsValidSid(&sid)?;
+            Ok(sid)
         }
 
         /// Get a pointer to the underlying SID structure
+        ///
+        /// Use this when interacting with FFI libraries that want SID
+        /// pointers. Taking a reference to the `Sid` struct won't work.
         pub fn as_ptr(&self) -> *const c_void {
             self.0.as_ptr()
-        }
-
-        /// Get the size of the SID in bytes
-        pub fn size(&self) -> usize {
-            unimplemented!();
-            //wrappers::GetLengthSid(&self);
         }
 
         /// Get the number of sub-authorities in the SID
@@ -95,15 +84,26 @@ mod sid {
         }
 
         /// Get a sub-authority in the SID if it is available
-        pub fn sub_authority(&self, index: u8) {}
+        ///
+        /// Returns `None` if the SID has too few sub-authorities.
+        pub fn sub_authority(&self, index: u8) -> Option<u32> {
+            wrappers::GetSidSubAuthorityChecked(self, index)
+        }
     }
 
     impl fmt::Debug for Sid {
         fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
             fmt.debug_map()
-                .entry(&"sub_auth_count", &self.sub_authority_count())
                 .entry(&"id_auth", &self.id_authority())
-                //.entry(&"sub_auth", &self.sub_authorities())
+                .entry(&"sub_auth_count", &self.sub_authority_count())
+                .entry(&"sub_auths[0]", &self.sub_authority(0))
+                .entry(&"sub_auths[1]", &self.sub_authority(1))
+                .entry(&"sub_auths[2]", &self.sub_authority(2))
+                .entry(&"sub_auths[3]", &self.sub_authority(3))
+                .entry(&"sub_auths[4]", &self.sub_authority(4))
+                .entry(&"sub_auths[5]", &self.sub_authority(5))
+                .entry(&"sub_auths[6]", &self.sub_authority(6))
+                .entry(&"sub_auths[7]", &self.sub_authority(7))
                 .finish()
         }
     }
