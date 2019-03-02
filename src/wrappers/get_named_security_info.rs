@@ -1,10 +1,10 @@
 use crate::utilities::{buf_from_os, has_bit};
 use crate::SecurityDescriptor;
 use std::ffi::OsStr;
+use std::io;
 use std::ptr::null_mut;
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::um::winnt::{self, PACL, PSECURITY_DESCRIPTOR, PSID};
-use windows_error::WindowsError;
 
 /// Wraps GetNamedSecurityInfoW
 #[allow(non_snake_case)]
@@ -12,7 +12,7 @@ pub fn GetNamedSecurityInfo(
     name: &OsStr,
     obj_type: u32,
     sec_info: u32,
-) -> Result<SecurityDescriptor, WindowsError> {
+) -> Result<SecurityDescriptor, io::Error> {
     let name = buf_from_os(name);
 
     let mut owner: PSID = null_mut();
@@ -21,7 +21,7 @@ pub fn GetNamedSecurityInfo(
     let mut sacl: PACL = null_mut();
     let mut sd: PSECURITY_DESCRIPTOR = null_mut();
 
-    let result: WindowsError = unsafe {
+    let result_code: u32 = unsafe {
         winapi::um::aclapi::GetNamedSecurityInfoW(
             name.as_ptr(),
             obj_type,
@@ -35,8 +35,8 @@ pub fn GetNamedSecurityInfo(
     }
     .into();
 
-    if result != ERROR_SUCCESS {
-        return Err(result);
+    if result_code != ERROR_SUCCESS {
+        return Err(io::Error::from_raw_os_error(result_code as i32));
     }
 
     let owner = if has_bit(sec_info, winnt::OWNER_SECURITY_INFORMATION) {

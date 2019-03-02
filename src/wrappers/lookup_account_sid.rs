@@ -1,8 +1,8 @@
 use crate::utilities::os_from_buf;
 use crate::Sid;
 use std::ffi::OsString;
+use std::io;
 use std::ptr::{null, null_mut};
-use windows_error::WindowsError;
 
 const BUFFER_SIZE: u32 = 256;
 
@@ -10,7 +10,7 @@ const BUFFER_SIZE: u32 = 256;
 ///
 /// Returns (name, domain)
 #[allow(non_snake_case)]
-pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), WindowsError> {
+pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), io::Error> {
     let mut name_size = BUFFER_SIZE;
     let mut dom_size = BUFFER_SIZE;
 
@@ -41,7 +41,7 @@ pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), WindowsError>
             continue;
         } else {
             // Failed, with no new allocation request
-            return Err(WindowsError::from_last_err());
+            return Err(io::Error::last_os_error());
         }
     }
 }
