@@ -29,7 +29,9 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid
     let result = unsafe {
         winapi::um::securitybaseapi::CreateWellKnownSid(
             sid_type,
-            domain_sid.map(|s| s.as_ptr() as *mut _).unwrap_or(null_mut()),
+            domain_sid
+                .map(|s| s.as_ptr() as *mut _)
+                .unwrap_or(null_mut()),
             sid_ptr.as_ptr(),
             &mut sid_len,
         )
