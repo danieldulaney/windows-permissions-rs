@@ -13,8 +13,10 @@
 // wrapped calls should be placed here.
 
 mod allocate_and_initialize_sid;
+mod build_trustee_with_sid;
 mod convert_sid_to_string_sid;
 mod convert_string_sid_to_sid;
+mod copy_sid;
 mod create_well_known_sid;
 mod equal_sid;
 mod get_named_security_info;
@@ -26,8 +28,10 @@ mod is_valid_sid;
 mod lookup_account_sid;
 
 pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
+pub use build_trustee_with_sid::BuildTrusteeWithSid;
 pub use convert_sid_to_string_sid::ConvertSidToStringSid;
 pub use convert_string_sid_to_sid::ConvertStringSidToSid;
+pub use copy_sid::CopySid;
 pub use create_well_known_sid::CreateWellKnownSid;
 pub use equal_sid::EqualSid;
 pub use get_named_security_info::GetNamedSecurityInfo;
