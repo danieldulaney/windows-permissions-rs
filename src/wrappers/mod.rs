@@ -13,6 +13,7 @@
 // wrapped calls should be placed here.
 
 mod allocate_and_initialize_sid;
+mod build_trustee_with_name;
 mod build_trustee_with_sid;
 mod convert_sid_to_string_sid;
 mod convert_string_sid_to_sid;
@@ -24,10 +25,12 @@ mod get_sid_identifier_authority;
 mod get_sid_length_required;
 mod get_sid_sub_authority;
 mod get_sid_sub_authority_count;
+mod get_trustee_form;
 mod is_valid_sid;
 mod lookup_account_sid;
 
 pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
+pub use build_trustee_with_name::{BuildTrusteeWithName, BuildTrusteeWithNameOsStr};
 pub use build_trustee_with_sid::BuildTrusteeWithSid;
 pub use convert_sid_to_string_sid::ConvertSidToStringSid;
 pub use convert_string_sid_to_sid::ConvertStringSidToSid;
@@ -42,6 +45,7 @@ pub use get_sid_sub_authority::{
     GetSidSubAuthorityMut,
 };
 pub use get_sid_sub_authority_count::GetSidSubAuthorityCount;
+pub use get_trustee_form::GetTrusteeForm;
 pub use is_valid_sid::IsValidSid;
 pub use lookup_account_sid::LookupAccountSid;
 
@@ -49,28 +53,24 @@ pub use lookup_account_sid::LookupAccountSid;
 mod test {
     use super::*;
 
+    use crate::Sid;
     use std::ffi::OsString;
     use winapi::um::winnt::{WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
 
     #[test]
     fn construct_and_read_sids() {
-        let id_auth = [0xBAu8, 0xD5, 0x1D, 0xBA, 0xD5, 0x1D];
-        let sub_auths_full = [20u32, 19, 18, 17, 16, 15, 14, 13];
+        for (sid, id, sa) in Sid::test_sids() {
+            assert_eq!(&id, GetSidIdentifierAuthority(&sid));
+            assert_eq!(sa.len() as u8, GetSidSubAuthorityCount(&sid));
 
-        for length in 1..=sub_auths_full.len() {
-            let sub_auths = &sub_auths_full[..length];
-
-            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths).unwrap();
-
-            assert_eq!(&id_auth, GetSidIdentifierAuthority(&sid));
-            assert_eq!(sub_auths.len() as u8, GetSidSubAuthorityCount(&sid));
-
-            for index in 0..sub_auths.len() {
+            for index in 0..sa.len() {
                 assert_eq!(
-                    Some(sub_auths[index]),
-                    GetSidSubAuthorityChecked(&sid, index as u8)
+                    Some(sa[index]),
+                    GetSidSubAuthorityChecked(&sid, index as u8),
                 );
             }
+
+            assert_eq!(None, GetSidSubAuthorityChecked(&sid, sa.len() as u8));
         }
     }
 
@@ -95,33 +95,32 @@ mod test {
 
     #[test]
     fn constructed_sids_string_roundtrip() {
-        let id_auth = [0xBAu8, 0xD5, 0x1D, 0xBA, 0xD5, 0x1D];
-        let sub_auths_full = [0u32, 1, 2, 3, 4, 5, 6, 7];
-
-        for length in 1..=sub_auths_full.len() {
-            let sub_auths = &sub_auths_full[..length];
-
-            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths).unwrap();
+        for (sid, _, _) in Sid::test_sids() {
             let string_sid = ConvertSidToStringSid(&sid).unwrap();
 
-            let sid_rt = ConvertStringSidToSid(&string_sid);
-
-            let sid_rt = sid_rt.unwrap();
+            let sid_rt = ConvertStringSidToSid(&string_sid).unwrap();
 
             assert!(EqualSid(&sid, &sid_rt));
         }
     }
 
     #[test]
+    fn sids_copy() {
+        for (sid, _, _) in Sid::test_sids() {
+            let copied = CopySid(&sid).unwrap();
+
+            if !EqualSid(&sid, &copied) {
+                dbg!(&sid);
+                dbg!(&copied);
+            }
+
+            assert!(EqualSid(&sid, &copied));
+        }
+    }
+
+    #[test]
     fn constructed_sids_are_valid() {
-        let id_auth = [0x00u8, 0x00, 0x0C, 0x00, 0x15, 0x1D];
-        let sub_auths_full = [0u32, 1, 2, 3, 4, 5, 6, 7];
-
-        for length in 1..=sub_auths_full.len() {
-            let sub_auths = &sub_auths_full[..length];
-
-            let sid = AllocateAndInitializeSid(id_auth.clone(), &sub_auths).unwrap();
-
+        for (sid, _, _) in Sid::test_sids() {
             assert!(IsValidSid(&sid).is_ok());
         }
     }

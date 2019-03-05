@@ -5,12 +5,20 @@ use std::ptr::NonNull;
 /// Wraps CopySid
 #[allow(non_snake_case)]
 pub fn CopySid(sid: &Sid) -> Result<Sid, io::Error> {
-    let len = wrappers::GetSidLengthRequired(wrappers::GetSidSubAuthorityCount(sid));
+    let size = wrappers::GetSidLengthRequired(wrappers::GetSidSubAuthorityCount(sid));
 
     // Must be wrapped in a Sid to ensure it is free'd
-    let ptr = unsafe { winapi::um::winbase::LocalAlloc(winapi::um::minwinbase::LMEM_FIXED, len) };
+    let ptr = unsafe { winapi::um::winbase::LocalAlloc(winapi::um::minwinbase::LMEM_FIXED, size) };
 
-    NonNull::new(ptr)
-        .map(|p| unsafe { Sid::owned_from_nonnull(p) })
-        .ok_or_else(|| io::Error::last_os_error())
+    let ptr = NonNull::new(ptr).ok_or_else(|| io::Error::last_os_error())?;
+
+    let success = unsafe {
+        winapi::um::securitybaseapi::CopySid(size as u32, ptr.as_ptr(), sid.as_ptr() as *mut _)
+    };
+
+    if success == 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        unsafe { Ok(Sid::owned_from_nonnull(ptr)) }
+    }
 }

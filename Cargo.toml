@@ -6,3 +6,6 @@ edition = "2018"
 
 [dependencies]
 winapi = { version = "0.3.6", features = ["aclapi", "winnt", "sddl", "securitybaseapi", "winerror"] }
+
+[dev-dependencies]
+itertools = "0.8"

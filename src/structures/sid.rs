@@ -85,6 +85,58 @@ impl Sid {
     pub fn sub_authority(&self, index: u8) -> Option<u32> {
         wrappers::GetSidSubAuthorityChecked(self, index)
     }
+
+    /// Generate a list of the sub-authorities in the SID
+    ///
+    /// Changes in the returned `Vec` are not reflected in the SID
+    pub fn sub_authorities(&self) -> Vec<u32> {
+        let mut vec = Vec::with_capacity(self.sub_authority_count() as usize);
+
+        for index in 0..self.sub_authority_count() {
+            vec.push(self.sub_authority(index).expect("Already checked count"));
+        }
+
+        vec
+    }
+
+    /// Return an iterator that yields a whole bunch of SIDs you can test
+    /// against, along with the things that got fed into `Sid::new` for each
+    ///
+    /// Only built on `cfg(test)`.
+    #[cfg(test)]
+    pub fn test_sids() -> impl Iterator<Item = (Sid, [u8; 6], &'static [u32])> {
+        extern crate itertools;
+        use itertools::Itertools;
+
+        const ID_AUTHS: &[[u8; 6]] = &[
+            [0, 0, 0, 0, 0, 0],
+            [0xff, 0xff, 0xff, 0xff, 0xff, 0xff],
+            [0xba, 0xd5, 0x1d, 0xba, 0xd5, 0x1d],
+            [0xc0, 0x00, 0x15, 0x1d, 0xab, 0xcd],
+        ];
+
+        const SUB_AUTHS: &[[u32; 8]] = &[
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [
+                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                0xffffffff,
+            ],
+            [1, 2, 3, 4, 5, 6, 7, 8],
+        ];
+
+        ID_AUTHS
+            .iter()
+            .cartesian_product(SUB_AUTHS)
+            .cartesian_product(1..=8)
+            .map(|((id, sa), sa_len)| {
+                let chopped_sa = &sa[..sa_len];
+                (
+                    Sid::new(id.clone(), chopped_sa).unwrap(),
+                    id.clone(),
+                    chopped_sa,
+                )
+            })
+    }
 }
 
 impl fmt::Debug for Sid {
@@ -92,14 +144,7 @@ impl fmt::Debug for Sid {
         fmt.debug_map()
             .entry(&"id_auth", &self.id_authority())
             .entry(&"sub_auth_count", &self.sub_authority_count())
-            .entry(&"sub_auths[0]", &self.sub_authority(0))
-            .entry(&"sub_auths[1]", &self.sub_authority(1))
-            .entry(&"sub_auths[2]", &self.sub_authority(2))
-            .entry(&"sub_auths[3]", &self.sub_authority(3))
-            .entry(&"sub_auths[4]", &self.sub_authority(4))
-            .entry(&"sub_auths[5]", &self.sub_authority(5))
-            .entry(&"sub_auths[6]", &self.sub_authority(6))
-            .entry(&"sub_auths[7]", &self.sub_authority(7))
+            .entry(&"sub_auths", &self.sub_authorities())
             .finish()
     }
 }
@@ -119,5 +164,11 @@ impl fmt::Display for Sid {
 impl PartialEq for Sid {
     fn eq(&self, other: &Sid) -> bool {
         wrappers::EqualSid(self, other)
+    }
+}
+
+impl Clone for Sid {
+    fn clone(&self) -> Sid {
+        wrappers::CopySid(self).expect("wrappers::CopySid failed (FILE AN ISSUE!)")
     }
 }
