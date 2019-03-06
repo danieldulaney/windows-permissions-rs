@@ -2,7 +2,7 @@ use std::ptr::NonNull;
 use winapi::ctypes::c_void;
 use winapi::um::winnt::{ACL, PACL, PSECURITY_DESCRIPTOR, PSID, SECURITY_DESCRIPTOR};
 
-use super::sid::Sid;
+use crate::{Acl, Sid};
 
 pub struct SecurityDescriptor {
     sd: NonNull<SECURITY_DESCRIPTOR>,
@@ -44,14 +44,13 @@ impl SecurityDescriptor {
         }
     }
 
-    /*
     /// Get the owner SID if it exists
     pub fn owner(&self) -> Option<&Sid> {
         // Assumptions:
         // - self.owner lives as long as self
         self.owner
             .clone()
-            .map(|p| unsafe { Sid::ref_from_nonnull(p, self) })
+            .map(|p| unsafe { Sid::ref_from_nonnull(&p) })
     }
 
     /// Get the group SID if it exists
@@ -60,9 +59,22 @@ impl SecurityDescriptor {
         // - self.group lives as long as self
         self.group
             .clone()
-            .map(|p| unsafe { Sid::ref_from_nonnull(p, self) })
+            .map(|p| unsafe { Sid::ref_from_nonnull(&p) })
     }
-    */
+
+    /// Get the DACL if it exists
+    pub fn dacl(&self) -> Option<&Acl> {
+        self.dacl
+            .clone()
+            .map(|p| unsafe { Acl::ref_from_nonnull(&p) })
+    }
+
+    /// Get the SACL if it exists
+    pub fn sacl(&self) -> Option<&Acl> {
+        self.sacl
+            .clone()
+            .map(|p| unsafe { Acl::ref_from_nonnull(&p) })
+    }
 }
 
 impl Drop for SecurityDescriptor {
