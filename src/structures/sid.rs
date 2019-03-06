@@ -16,23 +16,23 @@ impl Drop for Sid {
 impl Sid {
     /// Get `&Sid` from a `NonNull`
     ///
-    /// The `_lifetime` parameter indicates the lifetime of the reference.
+    /// The resulting reference lives as long as the given lifetime.
     ///
     /// ## Requirements
     ///
     /// - `ptr` points to a valid SID
-    /// - `_lifetime` lives at least as long as `ptr`
     /// - No mutable references exist to the SID
+    /// - `ptr` remains valid at least as long as `'s`
+    /// - The backing memory is free'd using some other alias
     ///
-    /// The easiest way to ensure that this is accurate is by ensuring that
-    /// `ptr` points to a valid SID somewhere in `_lifetime`. It's worth
+    /// It's worth
     /// noting that a SID does not have a static size -- the size of the
     /// SID, and therefore the memory area covered by these requirements,
     /// will depend on the contents of that memory area. Therefore, it is
     /// strongly encouraged that `ref_from_nonnull` is only called with
     /// pointers returned by WinAPI calls.
-    pub unsafe fn ref_from_nonnull<T>(ptr: NonNull<c_void>, _lifetime: &T) -> &Sid {
-        std::mem::transmute(ptr)
+    pub unsafe fn ref_from_nonnull<'s>(ptr: &NonNull<c_void>) -> &'s Sid {
+        std::mem::transmute::<&NonNull<c_void>, &'s Sid>(ptr)
     }
 
     /// Get a `Sid` from a `NonNull`
@@ -142,6 +142,7 @@ impl Sid {
 impl fmt::Debug for Sid {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_map()
+            .entry(&"pointer", &self.as_ptr())
             .entry(&"id_auth", &self.id_authority())
             .entry(&"sub_auth_count", &self.sub_authority_count())
             .entry(&"sub_auths", &self.sub_authorities())
@@ -170,5 +171,21 @@ impl PartialEq for Sid {
 impl Clone for Sid {
     fn clone(&self) -> Sid {
         wrappers::CopySid(self).expect("wrappers::CopySid failed (FILE AN ISSUE!)")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_ref_to_self() {
+        for (sid, _, _) in Sid::test_sids() {
+            let ptr = NonNull::new(sid.as_ptr() as *mut c_void).unwrap();
+
+            let sid_ref = unsafe { Sid::ref_from_nonnull(&ptr) };
+
+            assert_eq!(&sid, sid_ref);
+        }
     }
 }

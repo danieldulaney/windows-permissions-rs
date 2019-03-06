@@ -44,6 +44,7 @@ impl SecurityDescriptor {
         }
     }
 
+    /*
     /// Get the owner SID if it exists
     pub fn owner(&self) -> Option<&Sid> {
         // Assumptions:
@@ -61,6 +62,7 @@ impl SecurityDescriptor {
             .clone()
             .map(|p| unsafe { Sid::ref_from_nonnull(p, self) })
     }
+    */
 }
 
 impl Drop for SecurityDescriptor {
