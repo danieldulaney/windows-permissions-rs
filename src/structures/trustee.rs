@@ -1,9 +1,11 @@
 use crate::constants::TrusteeForm;
+use crate::utilities;
 use crate::wrappers;
 use crate::Sid;
 use std::ffi::OsStr;
+use std::fmt;
 use std::marker::PhantomData;
-use std::mem;
+use std::ptr::NonNull;
 use winapi::ctypes::c_void;
 use winapi::um::accctrl::TRUSTEE_W;
 
@@ -22,10 +24,11 @@ pub struct Trustee<'s> {
 /// `Sid` is easy: This Trustee holds a reference to the Sid it was created
 /// with.
 ///
-/// `Name` holds a WTF-16-encoded name. It can be converted into an `OsStr`
-/// using `utilities::buf_to_os`.
+/// `Name` holds a nul-terminated WTF-16-encoded name. It can be converted into
+/// an `OsString` using `utilities::os_from_buf`.
 ///
 /// `Bad` means that `trusteeForm` is explicitly set to `TRUSTEE_BAD_FORM`
+#[derive(Debug)]
 pub enum TrusteeSubject<'s> {
     Name(&'s [u16]),
     Sid(&'s Sid),
@@ -45,24 +48,12 @@ impl<'s> Trustee<'s> {
         &mut self.inner
     }
 
-    /// Allocate space for a TRUSTEE_W with the given lifetime
-    ///
-    /// All fields will
-    /// be set to zero. The parameter is not used, it just sets the lifetime
-    /// parameter on the `Trustee`.
-    pub unsafe fn allocate<S: ?Sized>(_lifetime: &'s S) -> Self {
+    /// Allocate space for a Trustee
+    pub unsafe fn allocate() -> Self {
         Self {
             inner: std::mem::zeroed(),
             _phantom: PhantomData,
         }
-    }
-
-    pub fn from_sid(sid: &'s Sid) -> Self {
-        wrappers::BuildTrusteeWithSid(sid)
-    }
-
-    pub fn from_name(name: &OsStr) -> Trustee<'static> {
-        wrappers::BuildTrusteeWithNameOsStr(name)
     }
 
     /// Get the `TrusteeSubject` of a `Trustee`
@@ -71,25 +62,87 @@ impl<'s> Trustee<'s> {
     ///
     /// Panics if the `trusteeForm` in the underlying object is an unrecognized
     /// value. To get the value, use `wrappers::GetTrusteeForm` directly.
+    ///
+    /// Also panics if the pointer value is null.
     pub fn get_subject(&self) -> TrusteeSubject<'s> {
         let form = wrappers::GetTrusteeForm(&self)
             .unwrap_or_else(|f| panic!("Trustee had unrecognized form: {:x}", f));
 
-        let ptr = self.inner.ptstrName;
+        let ptr = self.inner.ptstrName as *mut _;
 
-        unsafe {
-            match form {
-                TrusteeForm::TRUSTEE_IS_SID => TrusteeSubject::Sid(mem::transmute(ptr)),
-                _ => unimplemented!(),
+        match form {
+            TrusteeForm::TRUSTEE_IS_SID => {
+                let ptr =
+                    NonNull::new(ptr).expect("Null SID pointer on Trustee with TRUSTEE_IS_SID");
+
+                unsafe { TrusteeSubject::Sid(Sid::ref_from_nonnull(&ptr)) }
             }
+            TrusteeForm::TRUSTEE_IS_NAME => {
+                let ptr =
+                    NonNull::new(ptr).expect("Null name pointer on Trustee with TRUSTEE_IS_NAME");
+
+                unsafe {
+                    let nul_pos = utilities::search_buffer(&0x00, ptr.as_ptr() as *const u16);
+                    TrusteeSubject::Name(std::slice::from_raw_parts(
+                        ptr.as_ptr() as *const u16,
+                        nul_pos + 1,
+                    ))
+                }
+            }
+            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_SID => TrusteeSubject::ObjectsAndSid(ptr),
+            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_NAME => TrusteeSubject::ObjectsAndName(ptr),
+            TrusteeForm::TRUSTEE_BAD_FORM => TrusteeSubject::Bad,
         }
+    }
+}
+
+impl<'s> From<&'s Sid> for Trustee<'s> {
+    fn from(sid: &'s Sid) -> Self {
+        wrappers::BuildTrusteeWithSid(sid)
+    }
+}
+
+impl From<&OsStr> for Trustee<'static> {
+    fn from(name: &OsStr) -> Self {
+        wrappers::BuildTrusteeWithNameOsStr(name)
+    }
+}
+
+impl<'s> fmt::Debug for Trustee<'s> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_map().finish()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    const TRUSTEE_NAMES: &[&'static str] =
+        &["test_name", r"domain\username", "a_unicode_char: 💩"];
+
     #[test]
-    fn create_and_retrieve_sid() {
-        for (sid, _, _) in Sid::test_sids() {}
+    fn create_and_retrieve_sid_trustee() {
+        for (sid, _, _) in Sid::test_sids() {
+            let trustee: Trustee = (&sid).into();
+
+            match trustee.get_subject() {
+                TrusteeSubject::Sid(s) => assert_eq!(s, &sid),
+                _ => panic!("Expected to get back a TrusteeSubject::Sid"),
+            }
+        }
+    }
+
+    #[test]
+    fn create_and_retrieve_name_trustee() {
+        for name in TRUSTEE_NAMES {
+            let trustee: Trustee = OsStr::new(name).into();
+            let buffer = utilities::buf_from_os(OsStr::new(name));
+
+            match trustee.get_subject() {
+                TrusteeSubject::Name(n) => assert_eq!(n, buffer.as_slice()),
+                _ => panic!("Expected to get back a TrusteeSubject::Name"),
+            }
+        }
     }
 }

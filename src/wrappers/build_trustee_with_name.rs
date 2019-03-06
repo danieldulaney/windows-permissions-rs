@@ -5,7 +5,7 @@ use std::ffi::OsStr;
 /// Wraps BuildTrusteeWithNameW
 #[allow(non_snake_case)]
 pub fn BuildTrusteeWithName<'s>(name_buf: &'s [u16]) -> Trustee<'s> {
-    let mut trustee = unsafe { Trustee::allocate(name_buf) };
+    let mut trustee = unsafe { Trustee::allocate() };
 
     unsafe {
         winapi::um::aclapi::BuildTrusteeWithNameW(
