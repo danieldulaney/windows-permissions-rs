@@ -1,17 +1,18 @@
-use crate::utilities::{buf_from_os, has_bit};
+use crate::constants::{SeObjectType, SecurityInformation};
+use crate::utilities::buf_from_os;
 use crate::SecurityDescriptor;
 use std::ffi::OsStr;
 use std::io;
 use std::ptr::null_mut;
 use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winnt::{self, PACL, PSECURITY_DESCRIPTOR, PSID};
+use winapi::um::winnt::{PACL, PSECURITY_DESCRIPTOR, PSID};
 
 /// Wraps GetNamedSecurityInfoW
 #[allow(non_snake_case)]
 pub fn GetNamedSecurityInfo(
     name: &OsStr,
-    obj_type: u32,
-    sec_info: u32,
+    obj_type: SeObjectType,
+    sec_info: SecurityInformation,
 ) -> Result<SecurityDescriptor, io::Error> {
     let name = buf_from_os(name);
 
@@ -21,43 +22,42 @@ pub fn GetNamedSecurityInfo(
     let mut sacl: PACL = null_mut();
     let mut sd: PSECURITY_DESCRIPTOR = null_mut();
 
-    let result_code: u32 = unsafe {
+    let result_code = unsafe {
         winapi::um::aclapi::GetNamedSecurityInfoW(
             name.as_ptr(),
-            obj_type,
-            sec_info,
+            obj_type as u32,
+            sec_info.bits(),
             &mut owner,
             &mut group,
             &mut dacl,
             &mut sacl,
             &mut sd,
         )
-    }
-    .into();
+    };
 
     if result_code != ERROR_SUCCESS {
         return Err(io::Error::from_raw_os_error(result_code as i32));
     }
 
-    let owner = if has_bit(sec_info, winnt::OWNER_SECURITY_INFORMATION) {
+    let owner = if sec_info.contains(SecurityInformation::Owner) {
         owner
     } else {
         null_mut()
     };
 
-    let group = if has_bit(sec_info, winnt::GROUP_SECURITY_INFORMATION) {
+    let group = if sec_info.contains(SecurityInformation::Group) {
         group
     } else {
         null_mut()
     };
 
-    let dacl = if has_bit(sec_info, winnt::DACL_SECURITY_INFORMATION) {
+    let dacl = if sec_info.contains(SecurityInformation::Dacl) {
         dacl
     } else {
         null_mut()
     };
 
-    let sacl = if has_bit(sec_info, winnt::SACL_SECURITY_INFORMATION) {
+    let sacl = if sec_info.contains(SecurityInformation::Sacl) {
         sacl
     } else {
         null_mut()

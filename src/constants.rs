@@ -1,4 +1,5 @@
 use winapi::um::accctrl::*;
+use winapi::um::winnt::*;
 
 /// Create an enum from a list of constants. Generated enums get a method
 /// `from_raw` that allows them to be converted from a value.
@@ -47,6 +48,39 @@ constant_enum!(TrusteeType; u32;
 constant_enum!(MultipleTrusteeOperation; u32;
                NO_MULTIPLE_TRUSTEE,
                TRUSTEE_IS_IMPERSONATE);
+
+constant_enum!(SeObjectType; u32;
+               SE_UNKNOWN_OBJECT_TYPE,
+               SE_FILE_OBJECT,
+               SE_SERVICE,
+               SE_PRINTER,
+               SE_REGISTRY_KEY,
+               SE_LMSHARE,
+               SE_KERNEL_OBJECT,
+               SE_WINDOW_OBJECT,
+               SE_DS_OBJECT,
+               SE_DS_OBJECT_ALL,
+               SE_PROVIDER_DEFINED_OBJECT,
+               SE_WMIGUID_OBJECT,
+               SE_REGISTRY_WOW64_32KEY,
+               SE_REGISTRY_WOW64_64KEY);
+
+bitflags! {
+    pub struct SecurityInformation: u32 {
+        const Attribute = ATTRIBUTE_SECURITY_INFORMATION;
+        const Backup = BACKUP_SECURITY_INFORMATION;
+        const Dacl = DACL_SECURITY_INFORMATION;
+        const Group = GROUP_SECURITY_INFORMATION;
+        const Label = LABEL_SECURITY_INFORMATION;
+        const Owner = OWNER_SECURITY_INFORMATION;
+        const ProtectedDacl = PROTECTED_DACL_SECURITY_INFORMATION;
+        const ProtectedSacl = PROTECTED_SACL_SECURITY_INFORMATION;
+        const Sacl = SACL_SECURITY_INFORMATION;
+        const Scope = SCOPE_SECURITY_INFORMATION;
+        const UnprotectedDacl = UNPROTECTED_DACL_SECURITY_INFORMATION;
+        const UnprotectedSacl = UNPROTECTED_SACL_SECURITY_INFORMATION;
+    }
+}
 
 #[cfg(test)]
 mod test {
