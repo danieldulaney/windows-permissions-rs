@@ -82,6 +82,55 @@ bitflags! {
     }
 }
 
+bitflags! {
+    pub struct AccessRights: u32 {
+        // All
+        const All = 0xFFFF_FFFF;
+
+        // Bits 31-28: Generic rights
+        const GenericRead = GENERIC_READ;
+        const GenericWrite = GENERIC_WRITE;
+        const GenericExecute = GENERIC_EXECUTE;
+        const GenericAll = GENERIC_ALL;
+
+        // Bits 27-25: Reserved
+
+        // Bit 24: Access system security
+        const AccessSystemSecurity = ACCESS_SYSTEM_SECURITY;
+
+        // Bits 23-16: Standard access rights
+        const Delete = DELETE;
+        const ReadControl = READ_CONTROL;
+        const WriteDac = WRITE_DAC;
+        const WriteOwner = WRITE_OWNER;
+        const Synchronize = SYNCHRONIZE;
+        const StandardRightsRequired = STANDARD_RIGHTS_REQUIRED;
+        const StandardRightsRead = STANDARD_RIGHTS_READ;
+        const StandardRightsWrite = STANDARD_RIGHTS_WRITE;
+        const StandardRightsExecute = STANDARD_RIGHTS_EXECUTE;
+        const StartardRightsAll = STANDARD_RIGHTS_ALL;
+
+        // Object-specific access rights
+        const SpecificRightsAll = SPECIFIC_RIGHTS_ALL;
+        const Bit0  = 1 << 00;
+        const Bit1  = 1 << 01;
+        const Bit2  = 1 << 02;
+        const Bit3  = 1 << 03;
+        const Bit4  = 1 << 04;
+        const Bit5  = 1 << 05;
+        const Bit6  = 1 << 06;
+        const Bit7  = 1 << 07;
+        const Bit8  = 1 << 08;
+        const Bit9  = 1 << 09;
+        const Bit10 = 1 << 10;
+        const Bit11 = 1 << 11;
+        const Bit12 = 1 << 12;
+        const Bit13 = 1 << 13;
+        const Bit14 = 1 << 14;
+        const Bit15 = 1 << 15;
+    }
+}
+
 #[cfg(test)]
 mod test {
     const A: u8 = 5;
