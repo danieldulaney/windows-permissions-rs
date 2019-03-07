@@ -2,6 +2,7 @@ use crate::wrappers;
 use std::fmt;
 use std::io;
 use std::ptr::NonNull;
+use std::str::FromStr;
 use winapi::ctypes::c_void;
 
 #[allow(non_snake_case)]
@@ -171,6 +172,14 @@ impl PartialEq for Sid {
 impl Clone for Sid {
     fn clone(&self) -> Sid {
         wrappers::CopySid(self).expect("wrappers::CopySid failed (FILE AN ISSUE!)")
+    }
+}
+
+impl FromStr for Sid {
+    type Err = io::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        wrappers::ConvertStringSidToSid(s)
     }
 }
 

@@ -11,12 +11,9 @@ use std::ptr::{null_mut, NonNull};
 /// Panics if the underlying WinAPI call reports success but returns a null
 /// pointer. This should never happen.
 #[allow(non_snake_case)]
-pub fn ConvertStringSidToSid(string: &OsStr) -> Result<Sid, io::Error> {
+pub fn ConvertStringSidToSid<S: AsRef<OsStr> + ?Sized>(string: &S) -> Result<Sid, io::Error> {
     let buf = buf_from_os(string);
     let mut ptr = null_mut();
-
-    dbg!(&string);
-    dbg!(&buf);
 
     let result = unsafe { winapi::shared::sddl::ConvertStringSidToSidW(buf.as_ptr(), &mut ptr) };
 

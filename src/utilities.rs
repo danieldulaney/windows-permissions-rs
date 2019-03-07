@@ -34,8 +34,8 @@ pub fn os_from_buf(buf: &[u16]) -> OsString {
 /// let os = OsString::from("Test");
 /// assert_eq!(buf_from_os(&os), vec![0x0054, 0x0065, 0x0073, 0x0074, 0x0000]);
 /// ```
-pub fn buf_from_os(os: &OsStr) -> Vec<u16> {
-    let mut buf: Vec<u16> = os.encode_wide().collect();
+pub fn buf_from_os<S: AsRef<OsStr> + ?Sized>(os: &S) -> Vec<u16> {
+    let mut buf: Vec<u16> = os.as_ref().encode_wide().collect();
     buf.push(0);
     buf
 }
