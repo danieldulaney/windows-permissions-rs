@@ -1,9 +1,9 @@
-use crate::{Acl, Trustee};
+use crate::{constants::AccessRights, Acl, Trustee};
 use std::io;
 
 /// Wraps GetEffectiveRightsFromAclW
 #[allow(non_snake_case)]
-pub fn GetEffectiveRightsFromAcl(acl: &Acl, trustee: &Trustee) -> Result<u32, io::Error> {
+pub fn GetEffectiveRightsFromAcl(acl: &Acl, trustee: &Trustee) -> Result<AccessRights, io::Error> {
     let mut acc_mask = 0u32;
 
     let result = unsafe {
@@ -15,7 +15,7 @@ pub fn GetEffectiveRightsFromAcl(acl: &Acl, trustee: &Trustee) -> Result<u32, io
     };
 
     if result == winapi::shared::winerror::ERROR_SUCCESS {
-        Ok(acc_mask)
+        Ok(AccessRights::from_bits_truncate(acc_mask))
     } else {
         Err(io::Error::from_raw_os_error(result as i32))
     }

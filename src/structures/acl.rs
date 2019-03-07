@@ -1,3 +1,5 @@
+use crate::{constants, wrappers, Trustee};
+use std::io;
 use std::mem;
 use std::ptr::NonNull;
 use winapi::um::winnt::ACL;
@@ -13,5 +15,12 @@ impl Acl {
 
     pub fn as_ptr(&self) -> *const ACL {
         &self.inner
+    }
+
+    pub fn effective_rights(
+        &self,
+        trustee: &Trustee,
+    ) -> Result<constants::AccessRights, io::Error> {
+        wrappers::GetEffectiveRightsFromAcl(self, trustee)
     }
 }
