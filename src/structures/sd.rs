@@ -102,3 +102,34 @@ impl FromStr for SecurityDescriptor {
         wrappers::ConvertStringSecurityDescriptorToSecurityDescriptor(s)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    static SDDL_TEST_CASES: &[(&str, &str, &str)] = &[
+        ("", "", ""),
+        ("O:AOG:DA", "AO", "DA"),
+    ];
+
+    fn sddl_test_cases() -> io::Result<impl Iterator<Item=(String, Option<Sid>, Option<Sid>)>> {
+        let parse_if_there = |s: &str| {
+            if s.is_empty() {
+                None
+            } else {
+                dbg!(s);
+                Some(s.parse().unwrap())
+            }
+        };
+
+        Ok(SDDL_TEST_CASES.iter()
+            .map(move |(sddl, own, grp)| {
+                (sddl.to_string(), parse_if_there(own), parse_if_there(grp))
+            }))
+    }
+
+    #[test]
+    fn sddl_round_trip() -> io::Result<()>{
+        Ok(())
+    }
+}

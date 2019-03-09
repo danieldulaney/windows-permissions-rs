@@ -10,7 +10,6 @@ pub struct Sid(NonNull<c_void>);
 
 impl Drop for Sid {
     fn drop(&mut self) {
-        println!("Dropping {:?}", self.0.as_ptr());
         unsafe { winapi::um::winbase::LocalFree(self.0.as_ptr()) };
     }
 }
