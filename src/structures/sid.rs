@@ -10,6 +10,7 @@ pub struct Sid(NonNull<c_void>);
 
 impl Drop for Sid {
     fn drop(&mut self) {
+        println!("Dropping {:?}", self.0.as_ptr());
         unsafe { winapi::um::winbase::LocalFree(self.0.as_ptr()) };
     }
 }
@@ -32,8 +33,15 @@ impl Sid {
     /// will depend on the contents of that memory area. Therefore, it is
     /// strongly encouraged that `ref_from_nonnull` is only called with
     /// pointers returned by WinAPI calls.
+    #[inline(never)]
     pub unsafe fn ref_from_nonnull<'s>(ptr: &NonNull<c_void>) -> &'s Sid {
-        std::mem::transmute::<&NonNull<c_void>, &'s Sid>(ptr)
+        let ptr = ptr.as_ptr();
+        dbg!(ptr);
+        let ptr_to_ptr = &ptr as *const *mut c_void;
+        dbg!(ptr_to_ptr);
+        let ref_to_sid = std::mem::transmute::<*const *mut c_void, &Sid>(ptr_to_ptr);
+        dbg!(ref_to_sid);
+        return ref_to_sid;
     }
 
     /// Get a `Sid` from a `NonNull`
@@ -99,12 +107,14 @@ impl Sid {
 
         vec
     }
+}
 
+#[cfg(test)]
+impl Sid {
     /// Return an iterator that yields a whole bunch of SIDs you can test
     /// against, along with the things that got fed into `Sid::new` for each
     ///
     /// Only built on `cfg(test)`.
-    #[cfg(test)]
     pub fn test_sids() -> impl Iterator<Item = (Sid, [u8; 6], &'static [u32])> {
         extern crate itertools;
         use itertools::Itertools;
