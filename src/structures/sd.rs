@@ -13,6 +13,7 @@ pub struct SecurityDescriptor {
 
 impl Drop for SecurityDescriptor {
     fn drop(&mut self) {
+        debug_assert!(wrappers::IsValidSecurityDescriptor(&self));
         unsafe { winapi::um::winbase::LocalFree(self.inner.as_ptr() as *mut _) };
     }
 }
@@ -25,19 +26,9 @@ impl SecurityDescriptor {
     /// - `sd` points to a valid security descriptor and should be freed with
     ///   `LocalFree`
     pub unsafe fn owned_from_nonnull(ptr: NonNull<c_void>) -> SecurityDescriptor {
-        Self { inner: ptr }
-    }
-
-    pub fn validate(&self) -> Result<(), io::Error> {
-        if let Some(o) = self.owner() {
-            wrappers::IsValidSid(o)?;
-        }
-
-        if let Some(g) = self.group() {
-            wrappers::IsValidSid(g)?;
-        }
-
-        Ok(())
+        let sd = Self { inner: ptr };
+        debug_assert!(wrappers::IsValidSecurityDescriptor(&sd));
+        sd
     }
 
     pub fn as_ptr(&self) -> *mut c_void {

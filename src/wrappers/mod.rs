@@ -131,7 +131,7 @@ mod test {
     #[test]
     fn constructed_sids_are_valid() {
         for (sid, _, _) in Sid::test_sids() {
-            assert!(IsValidSid(&sid).is_ok());
+            assert!(IsValidSid(&sid));
         }
     }
 

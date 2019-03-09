@@ -10,6 +10,7 @@ pub struct Sid(NonNull<c_void>);
 
 impl Drop for Sid {
     fn drop(&mut self) {
+        debug_assert!(wrappers::IsValidSid(&self));
         unsafe { winapi::um::winbase::LocalFree(self.0.as_ptr()) };
     }
 }
@@ -40,6 +41,7 @@ impl Sid {
         dbg!(ptr_to_ptr);
         let ref_to_sid = std::mem::transmute::<*const *mut c_void, &Sid>(ptr_to_ptr);
         dbg!(ref_to_sid);
+        debug_assert!(wrappers::IsValidSid(ref_to_sid));
         return ref_to_sid;
     }
 
@@ -56,7 +58,9 @@ impl Sid {
         // callers fulfil an un-checked promise that is relied on by other
         // actually unsafe code. Do not remove the unsafe marker without
         // fully understanding the implications.
-        Sid(ptr)
+        let sid = Sid(ptr);
+        debug_assert!(wrappers::IsValidSid(&sid));
+        sid
     }
 
     /// Create a new `Sid`
@@ -65,7 +69,7 @@ impl Sid {
     /// sub-authorities. There must be between 1 and 8 sub-authorities.
     pub fn new(id_auth: [u8; 6], sub_auths: &[u32]) -> Result<Sid, io::Error> {
         let sid = wrappers::AllocateAndInitializeSid(id_auth, sub_auths)?;
-        wrappers::IsValidSid(&sid)?;
+        debug_assert!(wrappers::IsValidSid(&sid));
         Ok(sid)
     }
 
