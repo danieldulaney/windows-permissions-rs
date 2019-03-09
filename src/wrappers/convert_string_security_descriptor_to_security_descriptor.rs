@@ -23,7 +23,7 @@ pub fn ConvertStringSecurityDescriptorToSecurityDescriptor<S: AsRef<OsStr> + ?Si
         )
     };
 
-    if result != 0 {
+    if result == 0 {
         // Failed
         return Err(io::Error::last_os_error());
     }

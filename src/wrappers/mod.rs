@@ -12,6 +12,7 @@
 // test code in those sub-modules. However, tests that require multiple
 // wrapped calls should be placed here.
 
+mod is_valid_security_descriptor;
 mod allocate_and_initialize_sid;
 mod build_trustee_with_name;
 mod build_trustee_with_sid;
@@ -24,6 +25,7 @@ mod create_well_known_sid;
 mod equal_sid;
 mod get_effective_rights_from_acl;
 mod get_named_security_info;
+mod get_security_descriptor_owner;
 mod get_sid_identifier_authority;
 mod get_sid_length_required;
 mod get_sid_sub_authority;
@@ -32,6 +34,7 @@ mod get_trustee_form;
 mod is_valid_sid;
 mod lookup_account_sid;
 
+pub use is_valid_security_descriptor::IsValidSecurityDescriptor;
 pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
 pub use build_trustee_with_name::{BuildTrusteeWithName, BuildTrusteeWithNameOsStr};
 pub use build_trustee_with_sid::BuildTrusteeWithSid;
@@ -44,6 +47,7 @@ pub use create_well_known_sid::CreateWellKnownSid;
 pub use equal_sid::EqualSid;
 pub use get_effective_rights_from_acl::GetEffectiveRightsFromAcl;
 pub use get_named_security_info::GetNamedSecurityInfo;
+pub use get_security_descriptor_owner::GetSecurityDescriptorOwner;
 pub use get_sid_identifier_authority::GetSidIdentifierAuthority;
 pub use get_sid_length_required::GetSidLengthRequired;
 pub use get_sid_sub_authority::{
