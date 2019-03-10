@@ -33,16 +33,10 @@ impl Sid {
     /// will depend on the contents of that memory area. Therefore, it is
     /// strongly encouraged that `ref_from_nonnull` is only called with
     /// pointers returned by WinAPI calls.
-    #[inline(never)]
-    pub unsafe fn ref_from_nonnull<'s>(ptr: &NonNull<c_void>) -> &'s Sid {
-        let ptr = ptr.as_ptr();
-        dbg!(ptr);
-        let ptr_to_ptr = &ptr as *const *mut c_void;
-        dbg!(ptr_to_ptr);
-        let ref_to_sid = std::mem::transmute::<*const *mut c_void, &Sid>(ptr_to_ptr);
-        dbg!(ref_to_sid);
-        debug_assert!(wrappers::IsValidSid(ref_to_sid));
-        return ref_to_sid;
+    pub unsafe fn ref_from_nonnull<'s>(ptr: *const NonNull<c_void>) -> &'s Sid {
+        let sid_ref = std::mem::transmute::<*const NonNull<c_void>, &Sid>(ptr);
+        debug_assert!(wrappers::IsValidSid(sid_ref));
+        sid_ref
     }
 
     /// Get a `Sid` from a `NonNull`
