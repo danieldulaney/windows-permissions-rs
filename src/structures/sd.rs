@@ -67,12 +67,14 @@ impl SecurityDescriptor {
 
     /// Get the owner SID if it exists
     pub fn owner(&self) -> Option<&Sid> {
-        unimplemented!()
+        wrappers::GetSecurityDescriptorOwner(self)
+            .expect("Valid SecurityDescriptor failed to get owner")
     }
 
     /// Get the group SID if it exists
     pub fn group(&self) -> Option<&Sid> {
-        unimplemented!()
+        wrappers::GetSecurityDescriptorGroup(self)
+            .expect("Valid SecurityDescriptor failed to get group")
     }
 
     /// Get the DACL if it exists
@@ -100,27 +102,36 @@ mod test {
 
     static SDDL_TEST_CASES: &[(&str, &str, &str)] = &[
         ("", "", ""),
-        ("O:AOG:DA", "AO", "DA"),
+        ("O:AOG:SY", "AO", "SY"),
+        ("O:SU", "SU", ""),
+        ("G:SI", "", "SI"),
     ];
 
-    fn sddl_test_cases() -> io::Result<impl Iterator<Item=(String, Option<Sid>, Option<Sid>)>> {
+    fn sddl_test_cases() -> impl Iterator<Item = (String, Option<Sid>, Option<Sid>)> {
         let parse_if_there = |s: &str| {
             if s.is_empty() {
                 None
             } else {
-                dbg!(s);
                 Some(s.parse().unwrap())
             }
         };
 
-        Ok(SDDL_TEST_CASES.iter()
-            .map(move |(sddl, own, grp)| {
-                (sddl.to_string(), parse_if_there(own), parse_if_there(grp))
-            }))
+        SDDL_TEST_CASES.iter().map(move |(sddl, own, grp)| {
+            (sddl.to_string(), parse_if_there(own), parse_if_there(grp))
+        })
     }
 
     #[test]
-    fn sddl_round_trip() -> io::Result<()>{
+    fn sddl_round_trip() -> io::Result<()> {
+        for (sddl, owner, group) in sddl_test_cases() {
+            let sd: SecurityDescriptor = sddl.parse()?;
+
+            assert_eq!(sd.owner(), owner.as_ref());
+            assert_eq!(sd.group(), group.as_ref());
+
+            assert_eq!(OsStr::new(&sddl), &sd.as_sddl()?);
+        }
+
         Ok(())
     }
 }
