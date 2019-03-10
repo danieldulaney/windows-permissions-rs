@@ -79,12 +79,14 @@ impl SecurityDescriptor {
 
     /// Get the DACL if it exists
     pub fn dacl(&self) -> Option<&Acl> {
-        unimplemented!()
+        wrappers::GetSecurityDescriptorDacl(self)
+            .expect("Valid SecurityDescriptor failed to get dacl")
     }
 
     /// Get the SACL if it exists
     pub fn sacl(&self) -> Option<&Acl> {
-        unimplemented!()
+        wrappers::GetSecurityDescriptorSacl(self)
+            .expect("Valid SecurityDescriptor failed to get sacl")
     }
 }
 
@@ -105,6 +107,7 @@ mod test {
         ("O:AOG:SY", "AO", "SY"),
         ("O:SU", "SU", ""),
         ("G:SI", "", "SI"),
+        ("O:AOG:SYD:S:", "AO", "SY"),
     ];
 
     fn sddl_test_cases() -> impl Iterator<Item = (String, Option<Sid>, Option<Sid>)> {
@@ -122,15 +125,46 @@ mod test {
     }
 
     #[test]
-    fn sddl_round_trip() -> io::Result<()> {
+    fn sddl_get_sids() -> io::Result<()> {
         for (sddl, owner, group) in sddl_test_cases() {
             let sd: SecurityDescriptor = sddl.parse()?;
 
             assert_eq!(sd.owner(), owner.as_ref());
             assert_eq!(sd.group(), group.as_ref());
-
-            assert_eq!(OsStr::new(&sddl), &sd.as_sddl()?);
         }
+
+        Ok(())
+    }
+
+    #[test]
+    fn sddl_round_trip() -> io::Result<()> {
+        for (sddl, _, _) in sddl_test_cases() {
+            let sd: SecurityDescriptor = sddl.parse()?;
+            let sddl2 = sd.as_sddl()?;
+
+            assert_eq!(OsStr::new(&sddl), &sddl2);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn sddl_missing_acls() -> io::Result<()> {
+        let sd: SecurityDescriptor = "O:LAG:AO".parse()?;
+        assert!(sd.dacl().is_none());
+        assert!(sd.sacl().is_none());
+
+        let sd: SecurityDescriptor = "O:LAG:AOD:".parse()?;
+        assert!(sd.dacl().is_some());
+        assert!(sd.sacl().is_none());
+
+        let sd: SecurityDescriptor = "O:LAG:AOS:".parse()?;
+        assert!(sd.dacl().is_none());
+        assert!(sd.sacl().is_some());
+
+        let sd: SecurityDescriptor = "O:LAG:AOD:S:".parse()?;
+        assert!(sd.dacl().is_some());
+        assert!(sd.sacl().is_some());
 
         Ok(())
     }
