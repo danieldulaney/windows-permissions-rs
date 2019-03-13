@@ -151,6 +151,7 @@ impl fmt::Debug for Sid {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_map()
             .entry(&"pointer", &self.as_ptr())
+            .entry(&"string_sid", &self.to_string())
             .entry(&"id_auth", &self.id_authority())
             .entry(&"sub_auth_count", &self.sub_authority_count())
             .entry(&"sub_auths", &self.sub_authorities())
