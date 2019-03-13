@@ -1,10 +1,12 @@
 use crate::Acl;
-use winapi::um::winnt::ACL_SIZE_INFORMATION;
 use std::io;
+use winapi::um::winnt::ACL_SIZE_INFORMATION;
 
 /// Wraps GetAclInformation using ACL_SIZE_INFORMATION as the information class
 #[allow(non_snake_case)]
 pub fn GetAclInformationSize(acl: &Acl) -> io::Result<ACL_SIZE_INFORMATION> {
+    debug_assert!(crate::wrappers::IsValidAcl(acl));
+
     let mut info = ACL_SIZE_INFORMATION {
         AceCount: 0xDEADBEEF,
         AclBytesInUse: 0xDEADBEEF,
