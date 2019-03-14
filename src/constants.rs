@@ -65,6 +65,21 @@ constant_enum!(SeObjectType; u32;
                SE_REGISTRY_WOW64_32KEY,
                SE_REGISTRY_WOW64_64KEY);
 
+#[non_exhaustive]
+constant_enum!(AceType; u8;
+               ACCESS_ALLOWED_ACE_TYPE,
+               ACCESS_ALLOWED_CALLBACK_ACE_TYPE,
+               ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE,
+               ACCESS_ALLOWED_OBJECT_ACE_TYPE,
+               ACCESS_DENIED_ACE_TYPE,
+               ACCESS_DENIED_CALLBACK_ACE_TYPE,
+               ACCESS_DENIED_OBJECT_ACE_TYPE,
+               SYSTEM_AUDIT_ACE_TYPE,
+               SYSTEM_AUDIT_CALLBACK_ACE_TYPE,
+               SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE,
+               SYSTEM_AUDIT_OBJECT_ACE_TYPE,
+               SYSTEM_MANDATORY_LABEL_ACE_TYPE);
+
 bitflags! {
     pub struct SecurityInformation: u32 {
         const Attribute = ATTRIBUTE_SECURITY_INFORMATION;
