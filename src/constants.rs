@@ -65,7 +65,6 @@ constant_enum!(SeObjectType; u32;
                SE_REGISTRY_WOW64_32KEY,
                SE_REGISTRY_WOW64_64KEY);
 
-#[non_exhaustive]
 constant_enum!(AceType; u8;
                ACCESS_ALLOWED_ACE_TYPE,
                ACCESS_ALLOWED_CALLBACK_ACE_TYPE,
@@ -86,7 +85,7 @@ bitflags! {
         const FailedAccessAceFlag = FAILED_ACCESS_ACE_FLAG;
         const InheritOnlyAce = INHERIT_ONLY_ACE;
         const InheritedAce = INHERITED_ACE;
-        const NoPropogateIneritAce = NO_PROPOGATE_INHERIT_ACE;
+        const NoPropagateIneritAce = NO_PROPAGATE_INHERIT_ACE;
         const ObjectInheritAce = OBJECT_INHERIT_ACE;
         const SuccessfulAccessAceFlag = SUCCESSFUL_ACCESS_ACE_FLAG;
     }
