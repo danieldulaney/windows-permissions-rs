@@ -81,6 +81,18 @@ constant_enum!(AceType; u8;
                SYSTEM_MANDATORY_LABEL_ACE_TYPE);
 
 bitflags! {
+    pub struct AceFlags: u8 {
+        const ContainerInheritAce = CONTAINER_INHERIT_ACE;
+        const FailedAccessAceFlag = FAILED_ACCESS_ACE_FLAG;
+        const InheritOnlyAce = INHERIT_ONLY_ACE;
+        const InheritedAce = INHERITED_ACE;
+        const NoPropogateIneritAce = NO_PROPOGATE_INHERIT_ACE;
+        const ObjectInheritAce = OBJECT_INHERIT_ACE;
+        const SuccessfulAccessAceFlag = SUCCESSFUL_ACCESS_ACE_FLAG;
+    }
+}
+
+bitflags! {
     pub struct SecurityInformation: u32 {
         const Attribute = ATTRIBUTE_SECURITY_INFORMATION;
         const Backup = BACKUP_SECURITY_INFORMATION;
