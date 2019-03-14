@@ -17,16 +17,25 @@ impl Drop for Acl {
 }
 
 impl Acl {
+    /// Get a reference from an ACL pointer.
+    ///
+    /// ## Requirements
+    ///
+    /// - `ptr` must point to a valid ACL structure
+    /// - The ACL header must be followed by the correct number of ACEs
+    /// - The entire structure must remain alive at least as long as `'s`
     pub unsafe fn ref_from_nonnull<'s>(ptr: NonNull<ACL>) -> &'s Acl {
         let acl_ref: &Acl = mem::transmute(ptr);
         debug_assert!(wrappers::IsValidAcl(acl_ref));
         acl_ref
     }
 
+    /// Get a pointer to the underlying ACL structure
     pub fn as_ptr(&self) -> *const ACL {
         &self.inner
     }
 
+    /// Determine what rights the given `Trustee` has under this ACL
     pub fn effective_rights(
         &self,
         trustee: &Trustee,
@@ -34,6 +43,7 @@ impl Acl {
         wrappers::GetEffectiveRightsFromAcl(self, trustee)
     }
 
+    /// Determine the number of ACEs in this ACL
     pub fn len(&self) -> u32 {
         wrappers::GetAclInformationSize(self)
             .expect("GetAclInformation failed on valid ACL")
