@@ -1,8 +1,9 @@
-use crate::{constants, wrappers, Trustee};
+use crate::{constants, wrappers, Ace, Trustee};
 use std::fmt;
 use std::io;
 use std::mem;
 use std::ptr::NonNull;
+use winapi::shared::winerror::ERROR_INVALID_PARAMETER;
 use winapi::um::winnt::ACL;
 
 #[repr(C)]
@@ -31,8 +32,8 @@ impl Acl {
     }
 
     /// Get a pointer to the underlying ACL structure
-    pub fn as_ptr(&self) -> *const ACL {
-        &self.inner
+    pub fn as_ptr(&self) -> *mut ACL {
+        &self.inner as *const _ as *mut _
     }
 
     /// Determine what rights the given `Trustee` has under this ACL
@@ -49,11 +50,27 @@ impl Acl {
             .expect("GetAclInformation failed on valid ACL")
             .AceCount
     }
+
+    /// Get an ACE by index
+    ///
+    /// Returns `None` if there are too few ACEs to satisfy the request.
+    pub fn get_ace(&self, index: u32) -> Option<&Ace> {
+        match wrappers::GetAce(self, index) {
+            Ok(ace) => Some(ace),
+            Err(ref e) if e.raw_os_error() == Some(ERROR_INVALID_PARAMETER as i32) => None,
+            other_err => {
+                other_err.expect("GetAce returned error on valid Ace");
+                unreachable!() // Because other_err will always fail the expect
+            }
+        }
+    }
 }
 
 impl fmt::Debug for Acl {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.debug_map().finish()
+        let mut map = fmt.debug_map();
+        map.entry(&"len", &self.len());
+        map.finish()
     }
 }
 
@@ -61,6 +78,7 @@ impl fmt::Debug for Acl {
 mod test {
     use super::*;
 
+    use crate::constants::AceType;
     use crate::SecurityDescriptor;
 
     #[test]
@@ -83,6 +101,30 @@ mod test {
             assert_eq!(sd.dacl().unwrap().len(), dacl_count as u32);
             assert_eq!(sd.sacl().unwrap().len(), sacl_count as u32);
         }
+
+        Ok(())
+    }
+
+    #[test]
+    fn get_from_sddl() -> io::Result<()> {
+        let mut sddl = "D:".to_string();
+        let limit = 10;
+
+        for i in 0..limit {
+            sddl.push_str(&format!("(A;;;;;S-1-5-{})", i));
+        }
+
+        let sd: SecurityDescriptor = sddl.parse()?;
+        let dacl = sd.dacl().unwrap();
+
+        // Try to get each one
+        for i in 0..limit {
+            let ace = dacl.get_ace(i).unwrap();
+            assert_eq!(ace.ace_type(), AceType::ACCESS_ALLOWED_ACE_TYPE);
+        }
+
+        // Off the end
+        assert!(dacl.get_ace(limit).is_none());
 
         Ok(())
     }
