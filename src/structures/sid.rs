@@ -8,6 +8,7 @@ use winapi::ctypes::c_void;
 use winapi::um::winnt::SID;
 
 /// A reference to a SID
+#[repr(C)]
 pub struct Sid {
     _inner: SID,
 }
@@ -149,12 +150,6 @@ impl fmt::Display for Sid {
     }
 }
 
-impl PartialEq for Sid {
-    fn eq(&self, other: &Sid) -> bool {
-        wrappers::EqualSid(self, other)
-    }
-}
-
 impl LocallyOwnedSid {
     /// Get a `LocallyOwnedSid` from a `NonNull`
     ///
@@ -218,17 +213,20 @@ impl fmt::Debug for LocallyOwnedSid {
     }
 }
 
-impl PartialEq<Sid> for LocallyOwnedSid {
-    fn eq(&self, other: &Sid) -> bool {
-        wrappers::EqualSid(&self, other)
+macro_rules! impl_partial_eq {
+    ($lhs:ty, $rhs:ty) => {
+        impl PartialEq<$rhs> for $lhs {
+            fn eq(&self, other: &$rhs) -> bool {
+                wrappers::EqualSid(self, other)
+            }
+        }
     }
 }
 
-impl PartialEq<LocallyOwnedSid> for Sid {
-    fn eq(&self, other: &LocallyOwnedSid) -> bool {
-        wrappers::EqualSid(&self, other)
-    }
-}
+impl_partial_eq!(Sid, Sid);
+impl_partial_eq!(Sid, LocallyOwnedSid);
+impl_partial_eq!(LocallyOwnedSid, Sid);
+impl_partial_eq!(LocallyOwnedSid, LocallyOwnedSid);
 
 #[cfg(test)]
 mod test {
