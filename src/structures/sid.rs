@@ -229,3 +229,20 @@ impl PartialEq<LocallyOwnedSid> for Sid {
         wrappers::EqualSid(&self, other)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn create_and_read_sids() {
+        for (sid, id_auth, sub_auths) in Sid::test_sids() {
+            assert_eq!(*sid.id_authority(), id_auth);
+            assert_eq!(sid.sub_authority_count() as usize, sub_auths.len());
+
+            for i in 0..sub_auths.len() {
+                assert_eq!(sid.sub_authority(i as u8), Some(sub_auths[i]));
+            }
+        }
+    }
+}
