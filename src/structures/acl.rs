@@ -79,7 +79,7 @@ mod test {
     use super::*;
 
     use crate::constants::AceType;
-    use crate::SecurityDescriptor;
+    use crate::LocallyOwnedSecurityDescriptor;
 
     #[test]
     fn get_len() -> io::Result<()> {
@@ -96,7 +96,7 @@ mod test {
             sddl_string.push_str("S:");
             sddl_string.push_str(&"(AU;;;;;WD)".repeat(sacl_count));
 
-            let sd: SecurityDescriptor = sddl_string.parse()?;
+            let sd: LocallyOwnedSecurityDescriptor = sddl_string.parse()?;
 
             assert_eq!(sd.dacl().unwrap().len(), dacl_count as u32);
             assert_eq!(sd.sacl().unwrap().len(), sacl_count as u32);
@@ -114,7 +114,7 @@ mod test {
             sddl.push_str(&format!("(A;;;;;S-1-5-{})", i));
         }
 
-        let sd: SecurityDescriptor = sddl.parse()?;
+        let sd: LocallyOwnedSecurityDescriptor = sddl.parse()?;
         let dacl = sd.dacl().unwrap();
 
         // Try to get each one

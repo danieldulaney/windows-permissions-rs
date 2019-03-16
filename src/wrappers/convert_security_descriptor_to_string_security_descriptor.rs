@@ -20,7 +20,7 @@ pub fn ConvertSecurityDescriptorToStringSecurityDescriptor(
     // If success, buf_ptr must be LocalFree'd
     let result = unsafe {
         winapi::shared::sddl::ConvertSecurityDescriptorToStringSecurityDescriptorW(
-            sd.as_ptr(),
+            sd as *const _ as *mut _,
             winapi::shared::sddl::SDDL_REVISION_1.into(),
             info.bits(),
             &mut buf_ptr,

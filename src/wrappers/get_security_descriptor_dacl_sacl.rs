@@ -14,7 +14,7 @@ macro_rules! get_security_descriptor_acl {
 
             let result = unsafe {
                 winapi::um::securitybaseapi::$f(
-                    sd.as_ptr(),
+                    sd as *const _ as *mut _,
                     &mut present,
                     &mut acl_ptr,
                     &mut defaulted,

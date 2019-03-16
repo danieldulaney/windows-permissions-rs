@@ -11,7 +11,7 @@ pub fn GetSecurityDescriptorOwner(sd: &SecurityDescriptor) -> io::Result<Option<
 
     let result = unsafe {
         winapi::um::securitybaseapi::GetSecurityDescriptorOwner(
-            sd.as_ptr(),
+            sd as *const _ as *mut _,
             &mut sid_ptr,
             &mut _sid_default,
         )
@@ -33,7 +33,7 @@ pub fn GetSecurityDescriptorGroup(sd: &SecurityDescriptor) -> io::Result<Option<
 
     let result = unsafe {
         winapi::um::securitybaseapi::GetSecurityDescriptorGroup(
-            sd.as_ptr(),
+            sd as *const _ as *mut _,
             &mut sid_ptr,
             &mut _sid_default,
         )

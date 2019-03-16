@@ -4,6 +4,7 @@ use std::mem;
 use std::ptr::NonNull;
 use winapi::um::winnt::ACE_HEADER;
 
+#[repr(C)]
 pub struct Ace {
     header: ACE_HEADER,
 }
@@ -48,7 +49,7 @@ impl fmt::Debug for Ace {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::SecurityDescriptor;
+    use crate::LocallyOwnedSecurityDescriptor;
 
     enum DaclSacl {
         Dacl,
@@ -113,11 +114,11 @@ mod test {
         for (sddl_string, ace_type, which_acl) in test_cases.iter() {
             eprintln!("Testing {} yields {:?}", sddl_string, ace_type);
 
-            let sd = match which_acl {
+            let sd: LocallyOwnedSecurityDescriptor = match which_acl {
                 Dacl => format!("D:{}", sddl_string),
                 Sacl => format!("S:{}", sddl_string),
             }
-            .parse::<SecurityDescriptor>()
+            .parse()
             .unwrap();
 
             let acl = match which_acl {
@@ -165,11 +166,11 @@ mod test {
         for (sddl, flag, which_acl) in test_cases.iter() {
             eprintln!("Testing {} yields {:?}", sddl, flag);
 
-            let sd = match which_acl {
+            let sd: LocallyOwnedSecurityDescriptor = match which_acl {
                 Dacl => format!("D:(A;{};;;;WD)", sddl),
                 Sacl => format!("S:(AU;{};;;;WD)", sddl),
             }
-            .parse::<SecurityDescriptor>()
+            .parse()
             .unwrap();
 
             let acl = match which_acl {

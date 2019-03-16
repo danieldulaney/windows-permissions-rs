@@ -1,5 +1,5 @@
 use crate::utilities;
-use crate::SecurityDescriptor;
+use crate::LocallyOwnedSecurityDescriptor;
 use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
@@ -10,7 +10,7 @@ use std::ptr::{null_mut, NonNull};
 #[allow(non_snake_case)]
 pub fn ConvertStringSecurityDescriptorToSecurityDescriptor<S: AsRef<OsStr> + ?Sized>(
     string: &S,
-) -> io::Result<SecurityDescriptor> {
+) -> io::Result<LocallyOwnedSecurityDescriptor> {
     let buffer = utilities::buf_from_os(string);
     let mut sd_ptr = null_mut();
 
@@ -31,6 +31,6 @@ pub fn ConvertStringSecurityDescriptorToSecurityDescriptor<S: AsRef<OsStr> + ?Si
     Ok(unsafe {
         let ptr = NonNull::new(sd_ptr)
             .expect("ConvertStringSecurityDescriptorToSecurityDescriptorW reported success but returned null");
-        SecurityDescriptor::owned_from_nonnull(ptr)
+        LocallyOwnedSecurityDescriptor::owned_from_nonnull(ptr)
     })
 }

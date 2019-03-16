@@ -220,7 +220,7 @@ macro_rules! impl_partial_eq {
                 wrappers::EqualSid(self, other)
             }
         }
-    }
+    };
 }
 
 impl_partial_eq!(Sid, Sid);
