@@ -7,4 +7,4 @@ pub mod structures;
 pub mod utilities;
 pub mod wrappers;
 
-pub use structures::{Ace, Acl, SecurityDescriptor, Sid, Trustee};
+pub use structures::{Ace, Acl, LocallyOwnedSid, SecurityDescriptor, Sid, Trustee};

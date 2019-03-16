@@ -1,4 +1,4 @@
-use crate::Sid;
+use crate::LocallyOwnedSid;
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
@@ -10,7 +10,10 @@ use std::ptr::{null_mut, NonNull};
 /// sub-authorities. *Some* functions will parse it correctly, but lots (such
 /// as `ConvertStringSidToSid` will error.
 #[allow(non_snake_case)]
-pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> Result<Sid, io::Error> {
+pub fn AllocateAndInitializeSid(
+    id_auth: [u8; 6],
+    sub_auths: &[u32],
+) -> io::Result<LocallyOwnedSid> {
     if sub_auths.len() == 0 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -49,7 +52,7 @@ pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> Result<S
         // Success
         let nonnull =
             NonNull::new(ptr).expect("AllocateAndInitializeSid reported success but returned null");
-        Ok(unsafe { Sid::owned_from_nonnull(nonnull) })
+        Ok(unsafe { LocallyOwnedSid::owned_from_nonnull(nonnull) })
     } else {
         // Failure
         Err(io::Error::last_os_error())

@@ -75,7 +75,7 @@ impl<'s> Trustee<'s> {
                 let ptr =
                     NonNull::new(ptr).expect("Null SID pointer on Trustee with TRUSTEE_IS_SID");
 
-                unsafe { TrusteeSubject::Sid(Sid::ref_from_nonnull(&ptr)) }
+                unsafe { TrusteeSubject::Sid(Sid::ref_from_nonnull(ptr)) }
             }
             TrusteeForm::TRUSTEE_IS_NAME => {
                 let ptr =
@@ -123,8 +123,10 @@ mod tests {
 
     #[test]
     fn create_and_retrieve_sid_trustee() {
+        use std::ops::Deref;
+
         for (sid, _, _) in Sid::test_sids() {
-            let trustee: Trustee = (&sid).into();
+            let trustee: Trustee = (sid.deref()).into();
 
             match trustee.get_subject() {
                 TrusteeSubject::Sid(s) => assert_eq!(s, &sid),

@@ -1,17 +1,32 @@
 use crate::wrappers;
 use std::fmt;
 use std::io;
+use std::ops::Deref;
 use std::ptr::NonNull;
 use std::str::FromStr;
 use winapi::ctypes::c_void;
+use winapi::um::winnt::SID;
 
-#[allow(non_snake_case)]
-pub struct Sid(NonNull<c_void>);
+/// A reference to a SID
+pub struct Sid {
+    _inner: SID,
+}
+
+/// A SID allocated by the Windows API that should be freed with `LocalFree`
+pub struct LocallyOwnedSid {
+    ptr: NonNull<c_void>,
+}
 
 impl Drop for Sid {
     fn drop(&mut self) {
+        unreachable!("Sid should only be borrowed, not owned")
+    }
+}
+
+impl Drop for LocallyOwnedSid {
+    fn drop(&mut self) {
         debug_assert!(wrappers::IsValidSid(&self));
-        unsafe { winapi::um::winbase::LocalFree(self.0.as_ptr()) };
+        unsafe { winapi::um::winbase::LocalFree(self.ptr.as_ptr()) };
     }
 }
 
@@ -33,46 +48,10 @@ impl Sid {
     /// will depend on the contents of that memory area. Therefore, it is
     /// strongly encouraged that `ref_from_nonnull` is only called with
     /// pointers returned by WinAPI calls.
-    pub unsafe fn ref_from_nonnull<'s>(ptr: *const NonNull<c_void>) -> &'s Sid {
-        let sid_ref = std::mem::transmute::<*const NonNull<c_void>, &Sid>(ptr);
+    pub unsafe fn ref_from_nonnull<'s>(ptr: NonNull<c_void>) -> &'s Sid {
+        let sid_ref = std::mem::transmute::<NonNull<c_void>, &Sid>(ptr);
         debug_assert!(wrappers::IsValidSid(sid_ref));
         sid_ref
-    }
-
-    /// Get a `Sid` from a `NonNull`
-    ///
-    /// ## Requirements
-    ///
-    /// The `NonNull` pointer *must* have been allocated with
-    /// a Windows API call. When the resulting `Sid` is dropped, it
-    /// will be dropped with `LocalFree`.
-    pub unsafe fn owned_from_nonnull(ptr: NonNull<c_void>) -> Sid {
-        // Future maintainers:
-        // This function contains no unsafe code, but it requires that
-        // callers fulfil an un-checked promise that is relied on by other
-        // actually unsafe code. Do not remove the unsafe marker without
-        // fully understanding the implications.
-        let sid = Sid(ptr);
-        debug_assert!(wrappers::IsValidSid(&sid));
-        sid
-    }
-
-    /// Create a new `Sid`
-    ///
-    /// `id_auth` will be the identifier authority, `sub_auths` will be the
-    /// sub-authorities. There must be between 1 and 8 sub-authorities.
-    pub fn new(id_auth: [u8; 6], sub_auths: &[u32]) -> Result<Sid, io::Error> {
-        let sid = wrappers::AllocateAndInitializeSid(id_auth, sub_auths)?;
-        debug_assert!(wrappers::IsValidSid(&sid));
-        Ok(sid)
-    }
-
-    /// Get a pointer to the underlying SID structure
-    ///
-    /// Use this when interacting with FFI libraries that want SID
-    /// pointers. Taking a reference to the `Sid` struct won't work.
-    pub fn as_ptr(&self) -> *const c_void {
-        self.0.as_ptr()
     }
 
     /// Get the number of sub-authorities in the SID
@@ -112,7 +91,7 @@ impl Sid {
     /// against, along with the things that got fed into `Sid::new` for each
     ///
     /// Only built on `cfg(test)`.
-    pub fn test_sids() -> impl Iterator<Item = (Sid, [u8; 6], &'static [u32])> {
+    pub fn test_sids() -> impl Iterator<Item = (LocallyOwnedSid, [u8; 6], &'static [u32])> {
         extern crate itertools;
         use itertools::Itertools;
 
@@ -139,7 +118,7 @@ impl Sid {
             .map(|((id, sa), sa_len)| {
                 let chopped_sa = &sa[..sa_len];
                 (
-                    Sid::new(id.clone(), chopped_sa).unwrap(),
+                    LocallyOwnedSid::new(id.clone(), chopped_sa).unwrap(),
                     id.clone(),
                     chopped_sa,
                 )
@@ -150,7 +129,6 @@ impl Sid {
 impl fmt::Debug for Sid {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_map()
-            .entry(&"pointer", &self.as_ptr())
             .entry(&"string_sid", &self.to_string())
             .entry(&"id_auth", &self.id_authority())
             .entry(&"sub_auth_count", &self.sub_authority_count())
@@ -177,13 +155,53 @@ impl PartialEq for Sid {
     }
 }
 
-impl Clone for Sid {
-    fn clone(&self) -> Sid {
-        wrappers::CopySid(self).expect("wrappers::CopySid failed (FILE AN ISSUE!)")
+impl LocallyOwnedSid {
+    /// Get a `LocallyOwnedSid` from a `NonNull`
+    ///
+    /// ## Requirements
+    ///
+    /// The `NonNull` pointer *must* have been allocated with
+    /// a Windows API call. When the resulting `LocallyOwnedSid` is dropped, it
+    /// will be dropped with `LocalFree`.
+    pub unsafe fn owned_from_nonnull(ptr: NonNull<c_void>) -> Self {
+        // Future maintainers:
+        // This function contains no unsafe code, but it requires that
+        // callers fulfil an un-checked promise that is relied on by other
+        // actually unsafe code. Do not remove the unsafe marker without
+        // fully understanding the implications.
+        let sid = Self { ptr };
+        debug_assert!(wrappers::IsValidSid(&sid));
+        sid
+    }
+
+    /// Get a pointer to the underlying SID structure
+    ///
+    /// Use this when interacting with FFI libraries that want SID
+    /// pointers. Taking a reference to the `Sid` struct won't work.
+    pub fn as_ptr(&self) -> *const c_void {
+        self.ptr.as_ptr()
+    }
+
+    /// Create a new `Sid`
+    ///
+    /// `id_auth` will be the identifier authority, `sub_auths` will be the
+    /// sub-authorities. There must be between 1 and 8 sub-authorities.
+    pub fn new(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Result<Self> {
+        let sid = wrappers::AllocateAndInitializeSid(id_auth, sub_auths)?;
+        debug_assert!(wrappers::IsValidSid(&sid));
+        Ok(sid)
     }
 }
 
-impl FromStr for Sid {
+impl Deref for LocallyOwnedSid {
+    type Target = Sid;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { Sid::ref_from_nonnull(self.ptr) }
+    }
+}
+
+impl FromStr for LocallyOwnedSid {
     type Err = io::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -191,18 +209,23 @@ impl FromStr for Sid {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl fmt::Debug for LocallyOwnedSid {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_map()
+            .entry(&"pointer", &self.ptr)
+            .entry(&"string_sid", &self.to_string())
+            .finish()
+    }
+}
 
-    #[test]
-    fn get_ref_to_self() {
-        for (sid, _, _) in Sid::test_sids() {
-            let ptr = NonNull::new(sid.as_ptr() as *mut c_void).unwrap();
+impl PartialEq<Sid> for LocallyOwnedSid {
+    fn eq(&self, other: &Sid) -> bool {
+        wrappers::EqualSid(&self, other)
+    }
+}
 
-            let sid_ref = unsafe { Sid::ref_from_nonnull(&ptr) };
-
-            assert_eq!(&sid, sid_ref);
-        }
+impl PartialEq<LocallyOwnedSid> for Sid {
+    fn eq(&self, other: &LocallyOwnedSid) -> bool {
+        wrappers::EqualSid(&self, other)
     }
 }

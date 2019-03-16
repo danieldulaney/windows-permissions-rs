@@ -6,10 +6,10 @@ use std::ptr::null_mut;
 
 /// Wraps ConvertSidtoStringSidW
 #[allow(non_snake_case)]
-pub fn ConvertSidToStringSid(sid: &Sid) -> Result<OsString, io::Error> {
+pub fn ConvertSidToStringSid(sid: &Sid) -> io::Result<OsString> {
     let mut buf_ptr: *mut u16 = null_mut();
     let result = unsafe {
-        winapi::shared::sddl::ConvertSidToStringSidW(sid.as_ptr() as *mut _, &mut buf_ptr)
+        winapi::shared::sddl::ConvertSidToStringSidW(sid as *const _ as *mut _, &mut buf_ptr)
     };
 
     if result == 0 {

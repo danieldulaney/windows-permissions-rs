@@ -101,6 +101,7 @@ impl FromStr for SecurityDescriptor {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::LocallyOwnedSid;
 
     static SDDL_TEST_CASES: &[(&str, &str, &str)] = &[
         ("", "", ""),
@@ -110,7 +111,17 @@ mod test {
         ("O:AOG:SYD:S:", "AO", "SY"),
     ];
 
-    fn sddl_test_cases() -> impl Iterator<Item = (String, Option<Sid>, Option<Sid>)> {
+    fn assert_option_eq(lhs: Option<&Sid>, rhs: Option<&LocallyOwnedSid>) {
+        match (lhs, rhs) {
+            (None, None) => (),
+            (Some(_), None) => panic!("Assertion failed: {:?} == {:?}", lhs, rhs),
+            (None, Some(_)) => panic!("Assertion failed: {:?} == {:?}", lhs, rhs),
+            (Some(l), Some(r)) => assert_eq!(l, r),
+        }
+    }
+
+    fn sddl_test_cases(
+    ) -> impl Iterator<Item = (String, Option<LocallyOwnedSid>, Option<LocallyOwnedSid>)> {
         let parse_if_there = |s: &str| {
             if s.is_empty() {
                 None
@@ -129,8 +140,8 @@ mod test {
         for (sddl, owner, group) in sddl_test_cases() {
             let sd: SecurityDescriptor = sddl.parse()?;
 
-            assert_eq!(sd.owner(), owner.as_ref());
-            assert_eq!(sd.group(), group.as_ref());
+            assert_option_eq(sd.owner(), owner.as_ref());
+            assert_option_eq(sd.group(), group.as_ref());
         }
 
         Ok(())

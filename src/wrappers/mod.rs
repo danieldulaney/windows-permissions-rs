@@ -58,10 +58,7 @@ pub use get_security_descriptor_owner_group::{
 };
 pub use get_sid_identifier_authority::GetSidIdentifierAuthority;
 pub use get_sid_length_required::GetSidLengthRequired;
-pub use get_sid_sub_authority::{
-    GetSidSubAuthority, GetSidSubAuthorityChecked, GetSidSubAuthorityCheckedMut,
-    GetSidSubAuthorityMut,
-};
+pub use get_sid_sub_authority::{GetSidSubAuthority, GetSidSubAuthorityChecked};
 pub use get_sid_sub_authority_count::GetSidSubAuthorityCount;
 pub use get_trustee_form::GetTrusteeForm;
 pub use is_valid_acl::IsValidAcl;
@@ -92,25 +89,6 @@ mod test {
 
             assert_eq!(None, GetSidSubAuthorityChecked(&sid, sa.len() as u8));
         }
-    }
-
-    #[test]
-    fn modify_sid() {
-        let id_auth = [0u8; 6];
-
-        let sid1 = AllocateAndInitializeSid(id_auth.clone(), &[1]).unwrap();
-        let mut sid2 = AllocateAndInitializeSid(id_auth.clone(), &[2]).unwrap();
-        let mut sid3 =
-            AllocateAndInitializeSid(id_auth.clone(), &[1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
-
-        *GetSidSubAuthorityCheckedMut(&mut sid2, 0).unwrap() = 1;
-
-        assert!(EqualSid(&sid1, &sid2));
-        assert_eq!(GetSidSubAuthorityChecked(&sid1, 1), None);
-
-        assert_eq!(GetSidSubAuthorityChecked(&sid3, 7).unwrap(), 8);
-        *GetSidSubAuthorityCheckedMut(&mut sid3, 7).unwrap() = 10;
-        assert_eq!(GetSidSubAuthorityChecked(&sid3, 7).unwrap(), 10);
     }
 
     #[test]

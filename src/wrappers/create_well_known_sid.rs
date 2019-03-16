@@ -1,4 +1,4 @@
-use crate::{wrappers, Sid};
+use crate::{wrappers, LocallyOwnedSid, Sid};
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
@@ -10,9 +10,15 @@ use std::ptr::{null_mut, NonNull};
 /// If `domain_sid` is omitted, this has the same behavior as the underlying
 /// WinAPI function.
 #[allow(non_snake_case)]
-pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid, io::Error> {
+pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result<LocallyOwnedSid> {
     // Optimistically reserve enough space for a fairly large SID
     let mut sid_len = wrappers::GetSidLengthRequired(8) as u32;
+
+    // Get the pointer to the domain SID
+    let domain_sid_ptr = match domain_sid {
+        None => null_mut(),
+        Some(s) => s as *const _ as *mut _,
+    };
 
     // Assumptions:
     // - Returned value must be null-checked before use
@@ -21,7 +27,6 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid
         winapi::um::winbase::LocalAlloc(winapi::um::minwinbase::LMEM_FIXED, sid_len as usize)
     };
 
-    // No cleanup needed on failure -- the pointer was null anyway
     let sid_ptr = NonNull::new(sid_ptr).ok_or_else(|| io::Error::last_os_error())?;
 
     // At this point, the memory was allocated -- it *must* be freed
@@ -29,9 +34,7 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid
     let result = unsafe {
         winapi::um::securitybaseapi::CreateWellKnownSid(
             sid_type,
-            domain_sid
-                .map(|s| s.as_ptr() as *mut _)
-                .unwrap_or(null_mut()),
+            domain_sid_ptr,
             sid_ptr.as_ptr(),
             &mut sid_len,
         )
@@ -40,7 +43,7 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> Result<Sid
     if result != 0 {
         // Success! The SID was initialized and should be returned
         // Cleanup for the allocation will be performed when the Sid is Drop'd
-        return Ok(unsafe { Sid::owned_from_nonnull(sid_ptr) });
+        return Ok(unsafe { LocallyOwnedSid::owned_from_nonnull(sid_ptr) });
     } else {
         // Failure! Save off the error, free the buffer, and figure out what to do
 
