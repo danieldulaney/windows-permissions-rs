@@ -77,17 +77,21 @@ constant_enum!(AceType; u8;
                SYSTEM_AUDIT_CALLBACK_ACE_TYPE,
                SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE,
                SYSTEM_AUDIT_OBJECT_ACE_TYPE,
-               SYSTEM_MANDATORY_LABEL_ACE_TYPE);
+               SYSTEM_MANDATORY_LABEL_ACE_TYPE,
+               SYSTEM_ALARM_ACE_TYPE,
+               SYSTEM_ALARM_OBJECT_ACE_TYPE,
+               SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE,
+               SYSTEM_SCOPED_POLICY_ID_ACE_TYPE);
 
 bitflags! {
     pub struct AceFlags: u8 {
-        const ContainerInheritAce = CONTAINER_INHERIT_ACE;
-        const FailedAccessAceFlag = FAILED_ACCESS_ACE_FLAG;
-        const InheritOnlyAce = INHERIT_ONLY_ACE;
-        const InheritedAce = INHERITED_ACE;
-        const NoPropagateIneritAce = NO_PROPAGATE_INHERIT_ACE;
-        const ObjectInheritAce = OBJECT_INHERIT_ACE;
-        const SuccessfulAccessAceFlag = SUCCESSFUL_ACCESS_ACE_FLAG;
+        const ContainerInherit = CONTAINER_INHERIT_ACE;
+        const ObjectInherit = OBJECT_INHERIT_ACE;
+        const NoPropagateInherit = NO_PROPAGATE_INHERIT_ACE;
+        const InheritOnly = INHERIT_ONLY_ACE;
+        const Inherited = INHERITED_ACE;
+        const SuccessfulAccess = SUCCESSFUL_ACCESS_ACE_FLAG;
+        const FailedAccess = FAILED_ACCESS_ACE_FLAG;
     }
 }
 
