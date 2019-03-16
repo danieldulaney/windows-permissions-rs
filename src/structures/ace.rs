@@ -42,6 +42,8 @@ impl Ace {
 impl fmt::Debug for Ace {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let mut map = fmt.debug_map();
+        map.entry(&"ace_type", &self.ace_type());
+        map.entry(&"flags", &self.flags());
         map.finish()
     }
 }
@@ -62,7 +64,7 @@ mod test {
     fn get_type() {
         use crate::constants::AceType::*;
 
-        // In order: (SDDL ACE, expected type, is it SACL-only?)
+        // In order: (SDDL ACE, expected type, acl to use)
         //
         // The GUIDs are required because Windows automatically replaces object-
         // based ACEs with their non-object counterparts when no GUID is
