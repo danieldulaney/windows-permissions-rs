@@ -1,6 +1,6 @@
-use crate::{wrappers, LocallyOwnedSid, Sid};
+use crate::{constants::LocalAllocFlags, wrappers, LocalBox, Sid};
 use std::io;
-use std::ptr::{null_mut, NonNull};
+use std::ptr::null_mut;
 
 /// Wraps CreateWellKnownSid
 ///
@@ -10,7 +10,7 @@ use std::ptr::{null_mut, NonNull};
 /// If `domain_sid` is omitted, this has the same behavior as the underlying
 /// WinAPI function.
 #[allow(non_snake_case)]
-pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result<LocallyOwnedSid> {
+pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result<LocalBox<Sid>> {
     // Optimistically reserve enough space for a fairly large SID
     let mut sid_len = wrappers::GetSidLengthRequired(8) as u32;
 
@@ -20,41 +20,27 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result
         Some(s) => s as *const _ as *mut _,
     };
 
-    // Assumptions:
-    // - Returned value must be null-checked before use
-    // - Returned value must be free'd with LocalFree or similar
-    let sid_ptr = unsafe {
-        winapi::um::winbase::LocalAlloc(winapi::um::minwinbase::LMEM_FIXED, sid_len as usize)
+    // Allocate space for the new SID
+    let new_sid: LocalBox<Sid> = unsafe {
+        LocalBox::try_allocate(
+            LocalAllocFlags::Fixed | LocalAllocFlags::ZeroInit,
+            sid_len as usize,
+        )?
     };
-
-    let sid_ptr = NonNull::new(sid_ptr).ok_or_else(|| io::Error::last_os_error())?;
-
-    // At this point, the memory was allocated -- it *must* be freed
 
     let result = unsafe {
         winapi::um::securitybaseapi::CreateWellKnownSid(
             sid_type,
             domain_sid_ptr,
-            sid_ptr.as_ptr(),
+            new_sid.as_ptr() as *mut _,
             &mut sid_len,
         )
     };
 
     if result != 0 {
         // Success! The SID was initialized and should be returned
-        // Cleanup for the allocation will be performed when the Sid is Drop'd
-        return Ok(unsafe { LocallyOwnedSid::owned_from_nonnull(sid_ptr) });
+        return Ok(new_sid);
     } else {
-        // Failure! Save off the error, free the buffer, and figure out what to do
-
-        // It's important to get this error before freeing the buffer because
-        // LocalFree could potentially set its own error code
-        let error = io::Error::last_os_error();
-
-        unsafe { winapi::um::winbase::LocalFree(sid_ptr.as_ptr()) };
-
-        // TODO: Reallocate on error code 122 using the size that was written
-        // to sid_len
-        return Err(error);
+        return Err(io::Error::last_os_error());
     }
 }

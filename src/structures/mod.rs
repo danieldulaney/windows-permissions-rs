@@ -7,5 +7,5 @@ mod trustee;
 pub use ace::Ace;
 pub use acl::Acl;
 pub use sd::{LocallyOwnedSecurityDescriptor, SecurityDescriptor};
-pub use sid::{LocallyOwnedSid, Sid};
+pub use sid::Sid;
 pub use trustee::{Trustee, TrusteeSubject};

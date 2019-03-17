@@ -1,5 +1,5 @@
 use crate::utilities::buf_from_os;
-use crate::LocallyOwnedSid;
+use crate::{LocalBox, Sid};
 use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
@@ -11,7 +11,7 @@ use std::ptr::{null_mut, NonNull};
 /// Panics if the underlying WinAPI call reports success but returns a null
 /// pointer. This should never happen.
 #[allow(non_snake_case)]
-pub fn ConvertStringSidToSid<S: AsRef<OsStr> + ?Sized>(string: &S) -> io::Result<LocallyOwnedSid> {
+pub fn ConvertStringSidToSid<S: AsRef<OsStr> + ?Sized>(string: &S) -> io::Result<LocalBox<Sid>> {
     let buf = buf_from_os(string);
     let mut ptr = null_mut();
 
@@ -20,8 +20,8 @@ pub fn ConvertStringSidToSid<S: AsRef<OsStr> + ?Sized>(string: &S) -> io::Result
     if result != 0 {
         // Success
         Ok(unsafe {
-            LocallyOwnedSid::owned_from_nonnull(
-                NonNull::new(ptr)
+            LocalBox::from_raw(
+                NonNull::new(ptr as *mut _)
                     .expect("ConvertStringSidToSidW reported success but returned null"),
             )
         })

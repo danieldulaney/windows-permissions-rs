@@ -144,7 +144,7 @@ impl Deref for LocallyOwnedSecurityDescriptor {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::LocallyOwnedSid;
+    use crate::LocalBox;
 
     static SDDL_TEST_CASES: &[(&str, &str, &str)] = &[
         ("", "", ""),
@@ -154,17 +154,17 @@ mod test {
         ("O:AOG:SYD:S:", "AO", "SY"),
     ];
 
-    fn assert_option_eq(lhs: Option<&Sid>, rhs: Option<&LocallyOwnedSid>) {
+    fn assert_option_eq(lhs: Option<&Sid>, rhs: Option<&LocalBox<Sid>>) {
         match (lhs, rhs) {
             (None, None) => (),
             (Some(_), None) => panic!("Assertion failed: {:?} == {:?}", lhs, rhs),
             (None, Some(_)) => panic!("Assertion failed: {:?} == {:?}", lhs, rhs),
-            (Some(l), Some(r)) => assert_eq!(l, r),
+            (Some(l), Some(r)) => assert_eq!(l, r.deref()),
         }
     }
 
     fn sddl_test_cases(
-    ) -> impl Iterator<Item = (String, Option<LocallyOwnedSid>, Option<LocallyOwnedSid>)> {
+    ) -> impl Iterator<Item = (String, Option<LocalBox<Sid>>, Option<LocalBox<Sid>>)> {
         let parse_if_there = |s: &str| {
             if s.is_empty() {
                 None

@@ -1,4 +1,5 @@
 use winapi::um::accctrl::*;
+use winapi::um::minwinbase::*;
 use winapi::um::winnt::*;
 
 /// Create an enum from a list of constants. Generated enums get a method
@@ -158,6 +159,17 @@ bitflags! {
         const Bit13 = 1 << 13;
         const Bit14 = 1 << 14;
         const Bit15 = 1 << 15;
+    }
+}
+
+bitflags! {
+    pub struct LocalAllocFlags: u32 {
+        const Fixed = LMEM_FIXED;
+        const Moveable = LMEM_MOVEABLE;
+        const ZeroInit = LMEM_ZEROINIT;
+        const Discardable = LMEM_DISCARDABLE;
+        const NoCompact = LMEM_NOCOMPACT;
+        const NoDiscard = LMEM_NODISCARD;
     }
 }
 

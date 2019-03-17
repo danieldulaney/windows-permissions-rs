@@ -1,4 +1,4 @@
-use crate::LocallyOwnedSid;
+use crate::{LocalBox, Sid};
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
@@ -10,10 +10,7 @@ use std::ptr::{null_mut, NonNull};
 /// sub-authorities. *Some* functions will parse it correctly, but lots (such
 /// as `ConvertStringSidToSid` will error.
 #[allow(non_snake_case)]
-pub fn AllocateAndInitializeSid(
-    id_auth: [u8; 6],
-    sub_auths: &[u32],
-) -> io::Result<LocallyOwnedSid> {
+pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Result<LocalBox<Sid>> {
     if sub_auths.len() == 0 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -50,9 +47,9 @@ pub fn AllocateAndInitializeSid(
 
     if result != 0 {
         // Success
-        let nonnull =
-            NonNull::new(ptr).expect("AllocateAndInitializeSid reported success but returned null");
-        Ok(unsafe { LocallyOwnedSid::owned_from_nonnull(nonnull) })
+        let nonnull = NonNull::new(ptr as *mut _)
+            .expect("AllocateAndInitializeSid reported success but returned null");
+        Ok(unsafe { LocalBox::from_raw(nonnull) })
     } else {
         // Failure
         Err(io::Error::last_os_error())

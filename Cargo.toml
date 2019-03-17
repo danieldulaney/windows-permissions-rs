@@ -5,7 +5,14 @@ authors = ["Daniel Dulaney <dan@dulaney.xyz>"]
 edition = "2018"
 
 [dependencies]
-winapi = { version = "0.3.6", features = ["aclapi", "winnt", "sddl", "securitybaseapi", "winerror"] }
+winapi = { version = "0.3.6", features = [
+    "aclapi",
+    "handleapi",
+    "sddl",
+    "securitybaseapi",
+    "winerror",
+    "winnt",
+    ]}
 bitflags = "1"
 
 [dev-dependencies]

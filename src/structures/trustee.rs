@@ -129,7 +129,7 @@ mod tests {
             let trustee: Trustee = (sid.deref()).into();
 
             match trustee.get_subject() {
-                TrusteeSubject::Sid(s) => assert_eq!(s, &sid),
+                TrusteeSubject::Sid(s) => assert_eq!(s, sid.deref()),
                 _ => panic!("Expected to get back a TrusteeSubject::Sid"),
             }
         }
