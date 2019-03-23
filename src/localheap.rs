@@ -2,10 +2,30 @@ use crate::constants::LocalAllocFlags;
 use std::cmp::PartialEq;
 use std::fmt;
 use std::io;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::ptr::{null_mut, NonNull};
 
-/// Windows has several different options for allocation
+/// Windows has several different options for allocation. However, several of the
+/// WinAPI calls in this crate use the local heap, allocating with `LocalAlloc`
+/// and freeing with `LocalFree`. This type encapsulates that behavior,
+/// representing objects that reside on the local heap.
+///
+/// It is primarily created using `unsafe` code in the `wrappers` crate when
+/// the WinAPI allocates a data structure for the program (using `from_raw`).
+///
+/// However, allocations can be manually made with `try_allocate`. For example:
+///
+/// ```
+/// use std::mem::size_of;
+/// use windows_permissions::LocalBox;
+///
+/// let mut local_ptr: LocalBox<u32> = unsafe {
+///     LocalBox::try_allocate(true, size_of::<u32>()).unwrap()
+/// };
+///
+/// *local_ptr = 5u32;
+/// assert_eq!(*local_ptr, 5);
+/// ```
 pub struct LocalBox<T> {
     ptr: NonNull<T>,
 }
@@ -72,6 +92,12 @@ impl<T> Deref for LocalBox<T> {
 
     fn deref(&self) -> &Self::Target {
         unsafe { std::mem::transmute::<NonNull<T>, &T>(self.ptr) }
+    }
+}
+
+impl<T> DerefMut for LocalBox<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { std::mem::transmute::<NonNull<T>, &mut T>(self.ptr) }
     }
 }
 
