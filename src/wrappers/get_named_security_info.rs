@@ -1,6 +1,6 @@
 use crate::constants::{SeObjectType, SecurityInformation};
 use crate::utilities::buf_from_os;
-use crate::LocallyOwnedSecurityDescriptor;
+use crate::{LocalBox, SecurityDescriptor};
 use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
@@ -12,7 +12,7 @@ pub fn GetNamedSecurityInfo(
     name: &OsStr,
     obj_type: SeObjectType,
     sec_info: SecurityInformation,
-) -> io::Result<LocallyOwnedSecurityDescriptor> {
+) -> io::Result<LocalBox<SecurityDescriptor>> {
     let name = buf_from_os(name);
 
     let mut sd = null_mut();
@@ -34,7 +34,8 @@ pub fn GetNamedSecurityInfo(
         return Err(io::Error::from_raw_os_error(result_code as i32));
     }
 
-    let sd = NonNull::new(sd).expect("GetNamedSecurityInfoW reported success but returned null");
+    let sd = NonNull::new(sd as *mut _)
+        .expect("GetNamedSecurityInfoW reported success but returned null");
 
-    Ok(unsafe { LocallyOwnedSecurityDescriptor::owned_from_nonnull(sd) })
+    Ok(unsafe { LocalBox::from_raw(sd) })
 }

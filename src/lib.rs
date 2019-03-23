@@ -10,4 +10,4 @@ pub mod wrappers;
 
 pub use localheap::LocalBox;
 
-pub use structures::{Ace, Acl, LocallyOwnedSecurityDescriptor, SecurityDescriptor, Sid, Trustee};
+pub use structures::{Ace, Acl, SecurityDescriptor, Sid, Trustee};

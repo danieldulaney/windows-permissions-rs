@@ -51,7 +51,7 @@ impl fmt::Debug for Ace {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::LocallyOwnedSecurityDescriptor;
+    use crate::{LocalBox, SecurityDescriptor};
 
     enum DaclSacl {
         Dacl,
@@ -116,7 +116,7 @@ mod test {
         for (sddl_string, ace_type, which_acl) in test_cases.iter() {
             eprintln!("Testing {} yields {:?}", sddl_string, ace_type);
 
-            let sd: LocallyOwnedSecurityDescriptor = match which_acl {
+            let sd: LocalBox<SecurityDescriptor> = match which_acl {
                 Dacl => format!("D:{}", sddl_string),
                 Sacl => format!("S:{}", sddl_string),
             }
@@ -168,7 +168,7 @@ mod test {
         for (sddl, flag, which_acl) in test_cases.iter() {
             eprintln!("Testing {} yields {:?}", sddl, flag);
 
-            let sd: LocallyOwnedSecurityDescriptor = match which_acl {
+            let sd: LocalBox<SecurityDescriptor> = match which_acl {
                 Dacl => format!("D:(A;{};;;;WD)", sddl),
                 Sacl => format!("S:(AU;{};;;;WD)", sddl),
             }
