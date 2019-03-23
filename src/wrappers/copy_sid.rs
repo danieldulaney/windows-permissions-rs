@@ -1,4 +1,4 @@
-use crate::{constants::LocalAllocFlags, wrappers, LocalBox, Sid};
+use crate::{wrappers, LocalBox, Sid};
 use std::io;
 
 /// Wraps CopySid
@@ -6,7 +6,7 @@ use std::io;
 pub fn CopySid(sid: &Sid) -> io::Result<LocalBox<Sid>> {
     let size = wrappers::GetSidLengthRequired(wrappers::GetSidSubAuthorityCount(sid));
 
-    let new_sid: LocalBox<Sid> = unsafe { LocalBox::try_allocate(LocalAllocFlags::Fixed, size)? };
+    let new_sid: LocalBox<Sid> = unsafe { LocalBox::try_allocate(true, size)? };
 
     let success = unsafe {
         winapi::um::securitybaseapi::CopySid(

@@ -1,4 +1,4 @@
-use crate::{constants::LocalAllocFlags, wrappers, LocalBox, Sid};
+use crate::{wrappers, LocalBox, Sid};
 use std::io;
 use std::ptr::null_mut;
 
@@ -21,12 +21,7 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result
     };
 
     // Allocate space for the new SID
-    let new_sid: LocalBox<Sid> = unsafe {
-        LocalBox::try_allocate(
-            LocalAllocFlags::Fixed | LocalAllocFlags::ZeroInit,
-            sid_len as usize,
-        )?
-    };
+    let new_sid: LocalBox<Sid> = unsafe { LocalBox::try_allocate(true, sid_len as usize)? };
 
     let result = unsafe {
         winapi::um::securitybaseapi::CreateWellKnownSid(

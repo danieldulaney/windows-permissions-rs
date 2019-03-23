@@ -5,6 +5,7 @@ use std::io;
 use std::ops::Deref;
 use std::ptr::{null_mut, NonNull};
 
+/// Windows has several different options for allocation
 pub struct LocalBox<T> {
     ptr: NonNull<T>,
 }
@@ -34,11 +35,16 @@ impl<T> LocalBox<T> {
     /// ## Safety
     ///
     /// The contents of the memory are not guaranteed to be a valid `T`. The
-    /// contents will either be zeroed or uninitialized depending on the flags
-    /// provided.
+    /// contents will either be zeroed or uninitialized depending on the `zeroed`
+    /// parameter.
     ///
     /// Additionally, `size` should be large enough to contain a `T`.
-    pub unsafe fn try_allocate(flags: LocalAllocFlags, size: usize) -> io::Result<Self> {
+    pub unsafe fn try_allocate(zeroed: bool, size: usize) -> io::Result<Self> {
+        let flags = match zeroed {
+            true => LocalAllocFlags::Fixed | LocalAllocFlags::ZeroInit,
+            false => LocalAllocFlags::Fixed,
+        };
+
         let ptr = winapi::um::winbase::LocalAlloc(flags.bits(), size);
 
         Ok(Self {
@@ -80,13 +86,7 @@ impl<T: fmt::Debug> fmt::Debug for LocalBox<T> {
         self.deref().fmt(fmt)
     }
 }
-/*
-impl<T: PartialEq<T>> PartialEq<T> for LocalBox<T> {
-    fn eq(&self, other: &T) -> bool {
-        self.deref().eq(other)
-    }
-}
-*/
+
 impl<T, U> PartialEq<LocalBox<U>> for LocalBox<T>
 where
     T: PartialEq<U>,
