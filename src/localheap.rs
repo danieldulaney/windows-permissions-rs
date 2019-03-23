@@ -5,7 +5,8 @@ use std::io;
 use std::ops::{Deref, DerefMut};
 use std::ptr::{null_mut, NonNull};
 
-/// Windows has several different options for allocation. However, several of the
+/// Windows has several different options for allocation, and the local heap is
+/// no longer recommended. However, several of the
 /// WinAPI calls in this crate use the local heap, allocating with `LocalAlloc`
 /// and freeing with `LocalFree`. This type encapsulates that behavior,
 /// representing objects that reside on the local heap.
@@ -13,19 +14,28 @@ use std::ptr::{null_mut, NonNull};
 /// It is primarily created using `unsafe` code in the `wrappers` crate when
 /// the WinAPI allocates a data structure for the program (using `from_raw`).
 ///
-/// However, allocations can be manually made with `try_allocate`. For example:
+/// However, allocations can be manually made with `allocate` or `try_allocate`.
+/// For example:
 ///
 /// ```
 /// use std::mem::size_of;
 /// use windows_permissions::LocalBox;
 ///
-/// let mut local_ptr: LocalBox<u32> = unsafe {
+/// let mut local_ptr1: LocalBox<u32> = unsafe { LocalBox::allocate() };
+///
+/// let mut local_ptr2: LocalBox<u32> = unsafe {
 ///     LocalBox::try_allocate(true, size_of::<u32>()).unwrap()
 /// };
 ///
-/// *local_ptr = 5u32;
-/// assert_eq!(*local_ptr, 5);
+/// *local_ptr1 = 5u32;
+/// *local_ptr2 = 5u32;
+/// assert_eq!(local_ptr1, local_ptr2);
 /// ```
+///
+/// ## Exotically-sized types
+///
+/// This struct has not been tested with exotically-sized types. Use with
+/// extreme caution.
 pub struct LocalBox<T> {
     ptr: NonNull<T>,
 }
@@ -46,6 +56,24 @@ impl<T> LocalBox<T> {
         // actually unsafe code. Do not remove the unsafe marker without
         // fully understanding the implications.
         Self { ptr }
+    }
+
+    /// Allocate enough zeroed memory to hold a `T` with `LocalAlloc`
+    ///
+    /// The memory will always come back zeroed, which has a modest performance
+    /// penalty but can reduce the impact of buffer overruns.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if the underlying `LocalAlloc` call fails.
+    ///
+    /// ## Safety
+    ///
+    /// The allocated memory is zeroed, which may not be a valid representation
+    /// of a `T`.
+    pub unsafe fn allocate() -> Self {
+        Self::try_allocate(true, std::mem::size_of::<T>())
+            .expect("LocalAlloc failed to allocate memory")
     }
 
     /// Allocate memory with `LocalAlloc`
@@ -91,13 +119,13 @@ impl<T> Deref for LocalBox<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { std::mem::transmute::<NonNull<T>, &T>(self.ptr) }
+        unsafe { self.ptr.as_ref() }
     }
 }
 
 impl<T> DerefMut for LocalBox<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { std::mem::transmute::<NonNull<T>, &mut T>(self.ptr) }
+        unsafe { self.ptr.as_mut() }
     }
 }
 
