@@ -1,5 +1,6 @@
 use std::ffi::{OsStr, OsString};
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::ptr::null;
 
 /// Create an `OsString` from a NUL-terminated buffer
 ///
@@ -100,6 +101,29 @@ pub unsafe fn search_buffer<T: PartialEq>(needle: &T, haystack: *const T) -> usi
 /// ```
 pub fn has_bit(field: u32, bit: u32) -> bool {
     field & bit != 0
+}
+
+/// Get a pointer from an option
+///
+/// Returns null if the option is `None`.
+///
+/// ```
+/// use windows_permissions::utilities::ptr_from_opt;
+/// use std::ptr::null;
+///
+/// let five: u32 = 5;
+///
+/// let some = Some(&five);
+/// let none: Option<&u32> = None;
+///
+/// assert_eq!(ptr_from_opt(some), &five);
+/// assert_eq!(ptr_from_opt(none), null());
+/// ```
+pub fn ptr_from_opt<T>(opt: Option<&T>) -> *const T {
+    match opt {
+        Some(inner) => inner,
+        None => null(),
+    }
 }
 
 #[cfg(test)]
