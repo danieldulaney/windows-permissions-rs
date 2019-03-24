@@ -38,6 +38,7 @@ mod is_valid_acl;
 mod is_valid_security_descriptor;
 mod is_valid_sid;
 mod lookup_account_sid;
+mod set_security_info;
 
 pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
 pub use build_trustee_with_name::{BuildTrusteeWithName, BuildTrusteeWithNameOsStr};
@@ -67,6 +68,7 @@ pub use is_valid_acl::IsValidAcl;
 pub use is_valid_security_descriptor::IsValidSecurityDescriptor;
 pub use is_valid_sid::IsValidSid;
 pub use lookup_account_sid::LookupAccountSid;
+pub use set_security_info::SetSecurityInfo;
 
 #[cfg(test)]
 mod test {
