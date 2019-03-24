@@ -28,6 +28,7 @@ mod get_effective_rights_from_acl;
 mod get_named_security_info;
 mod get_security_descriptor_dacl_sacl;
 mod get_security_descriptor_owner_group;
+mod get_security_info;
 mod get_sid_identifier_authority;
 mod get_sid_length_required;
 mod get_sid_sub_authority;
@@ -56,6 +57,7 @@ pub use get_security_descriptor_dacl_sacl::{GetSecurityDescriptorDacl, GetSecuri
 pub use get_security_descriptor_owner_group::{
     GetSecurityDescriptorGroup, GetSecurityDescriptorOwner,
 };
+pub use get_security_info::GetSecurityInfo;
 pub use get_sid_identifier_authority::GetSidIdentifierAuthority;
 pub use get_sid_length_required::GetSidLengthRequired;
 pub use get_sid_sub_authority::{GetSidSubAuthority, GetSidSubAuthorityChecked};

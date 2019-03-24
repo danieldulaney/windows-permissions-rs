@@ -2,6 +2,7 @@ use crate::constants::{SeObjectType, SecurityInformation};
 use crate::{wrappers, Acl, LocalBox, Sid};
 use std::ffi::{OsStr, OsString};
 use std::fmt;
+use std::fs::File;
 use std::io;
 use std::ptr::NonNull;
 use std::str::FromStr;
@@ -25,11 +26,23 @@ impl SecurityDescriptor {
     /// default parameters. For more options (such as fetching a partial
     /// descriptor, or getting descriptors for other objects), call that method
     /// directly.
-    pub fn lookup_file<S: AsRef<OsStr> + ?Sized>(
+    pub fn lookup_path<S: AsRef<OsStr> + ?Sized>(
         path: &S,
-    ) -> Result<LocalBox<SecurityDescriptor>, io::Error> {
+    ) -> io::Result<LocalBox<SecurityDescriptor>> {
         wrappers::GetNamedSecurityInfo(
             path.as_ref(),
+            SeObjectType::SE_FILE_OBJECT,
+            SecurityInformation::Dacl | SecurityInformation::Owner | SecurityInformation::Group,
+        )
+    }
+
+    /// Get the security descriptor for a file
+    ///
+    /// This is a direct call to `wrappers::GetSecurityInfo` with some default
+    /// parameters. For more options, call that method directly.
+    pub fn lookup_file(file: &File) -> io::Result<LocalBox<SecurityDescriptor>> {
+        wrappers::GetSecurityInfo(
+            file,
             SeObjectType::SE_FILE_OBJECT,
             SecurityInformation::Dacl | SecurityInformation::Owner | SecurityInformation::Group,
         )
