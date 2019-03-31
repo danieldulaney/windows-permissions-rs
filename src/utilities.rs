@@ -1,6 +1,9 @@
+use crate::{wrappers, LocalBox, Sid};
 use std::ffi::{OsStr, OsString};
+use std::io;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::ptr::null;
+use std::ptr::{null, null_mut};
+use winapi::um::winnt::{HANDLE, TOKEN_USER};
 
 /// Create an `OsString` from a NUL-terminated buffer
 ///
@@ -126,6 +129,90 @@ pub fn ptr_from_opt<T>(opt: Option<&T>) -> *const T {
     }
 }
 
+/// Get the user SID of the current process
+pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
+    let mut process_token: HANDLE = null_mut();
+
+    // process_token must not be used until return value is checked
+    // process_token must be closed if return value is nonzero
+    let result = unsafe {
+        winapi::um::processthreadsapi::OpenProcessToken(
+            winapi::um::processthreadsapi::GetCurrentProcess(),
+            winapi::um::winnt::TOKEN_QUERY,
+            &mut process_token,
+        )
+    };
+
+    if result == 0 {
+        // Failed; no need for cleanup
+        return Err(io::Error::last_os_error());
+    }
+
+    // Experimentation suggests that 44 bytes is the normal space required on
+    // x64. Will automatically reallocate later if that's not enough
+    let mut len = 44u32;
+    let mut token_info;
+
+    loop {
+        token_info = vec![0u8; len as usize];
+
+        dbg!(len);
+
+        let result = unsafe {
+            winapi::um::securitybaseapi::GetTokenInformation(
+                process_token,
+                winapi::um::winnt::TokenUser,
+                token_info.as_mut_ptr() as *mut _,
+                len.clone(),
+                &mut len,
+            )
+        };
+
+        if result != 0 {
+            // Success!
+            dbg!(&token_info);
+            break;
+        } else {
+            // Save off the error code before CloseHandle in case CloseHandle has
+            // its own error
+            let error_code = io::Error::last_os_error();
+
+            // If we got error code 122, try again
+            // len was updated to the new size by the API call
+            if error_code.raw_os_error()
+                == Some(winapi::shared::winerror::ERROR_INSUFFICIENT_BUFFER as i32)
+            {
+                continue;
+            }
+
+            unsafe { winapi::um::handleapi::CloseHandle(process_token) };
+
+            return Err(error_code);
+        }
+    }
+
+    dbg!(&token_info);
+
+    // Read from the inside out:
+    // - Raw pointer to the start of the Vec<u8> underlying buffer
+    // - Cast to a TOKEN_USER pointer
+    // - Dereferenced to a TOKEN_USER
+    // - Get the User field (type SID_AND_ATTRIBUTES)
+    // - Get the Sid field (a void pointer, but we know it's a Sid pointer)
+    // - Cast it to a Sid raw pointer
+    // - Dereference that to a Sid
+    // - Take the reference as a safe &Sid
+    let sid_ref = unsafe { &*((*(token_info.as_ptr() as *const TOKEN_USER)).User.Sid as *mut Sid) };
+
+    let sid_copy = wrappers::CopySid(sid_ref);
+
+    unsafe {
+        winapi::um::handleapi::CloseHandle(process_token);
+    }
+
+    sid_copy
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -147,5 +234,10 @@ mod test {
         assert_eq!(os_from_buf(&unicode_buf), unicode_os);
         assert_eq!(buf_from_os(&unicode_os), unicode_buf);
         assert_eq!(os_from_buf(&unicode_buf_nuls), unicode_os);
+    }
+
+    #[test]
+    fn got_a_sid_for_the_current_process() {
+        assert!(current_process_sid().is_ok());
     }
 }
