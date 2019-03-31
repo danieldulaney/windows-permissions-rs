@@ -19,8 +19,17 @@ impl Drop for Sid {
 }
 
 impl Sid {
+    /// Create a new well-known SID from raw parts
     pub fn new(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Result<LocalBox<Sid>> {
         wrappers::AllocateAndInitializeSid(id_auth, sub_auths)
+    }
+
+    /// Create a new well-known SID
+    ///
+    /// This is equivalent to calling `wrappers::CreateWellKnownSid` with
+    /// `None` as the domain.
+    pub fn well_known_sid(well_known_sid_type: u32) -> io::Result<LocalBox<Sid>> {
+        wrappers::CreateWellKnownSid(well_known_sid_type, None)
     }
 
     /// Get `&Sid` from a `NonNull`
