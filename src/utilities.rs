@@ -156,8 +156,6 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
     loop {
         token_info = vec![0u8; len as usize];
 
-        dbg!(len);
-
         let result = unsafe {
             winapi::um::securitybaseapi::GetTokenInformation(
                 process_token,
@@ -170,7 +168,6 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
 
         if result != 0 {
             // Success!
-            dbg!(&token_info);
             break;
         } else {
             // Save off the error code before CloseHandle in case CloseHandle has
@@ -190,8 +187,6 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
             return Err(error_code);
         }
     }
-
-    dbg!(&token_info);
 
     // Read from the inside out:
     // - Raw pointer to the start of the Vec<u8> underlying buffer

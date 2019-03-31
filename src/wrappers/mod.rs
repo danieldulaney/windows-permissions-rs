@@ -34,10 +34,12 @@ mod get_sid_length_required;
 mod get_sid_sub_authority;
 mod get_sid_sub_authority_count;
 mod get_trustee_form;
+mod get_windows_account_domain_sid;
 mod is_valid_acl;
 mod is_valid_security_descriptor;
 mod is_valid_sid;
 mod lookup_account_sid;
+mod set_named_security_info;
 mod set_security_info;
 
 pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
@@ -64,10 +66,12 @@ pub use get_sid_length_required::GetSidLengthRequired;
 pub use get_sid_sub_authority::{GetSidSubAuthority, GetSidSubAuthorityChecked};
 pub use get_sid_sub_authority_count::GetSidSubAuthorityCount;
 pub use get_trustee_form::GetTrusteeForm;
+pub use get_windows_account_domain_sid::GetWindowsAccountDomainSid;
 pub use is_valid_acl::IsValidAcl;
 pub use is_valid_security_descriptor::IsValidSecurityDescriptor;
 pub use is_valid_sid::IsValidSid;
 pub use lookup_account_sid::LookupAccountSid;
+pub use set_named_security_info::SetNamedSecurityInfo;
 pub use set_security_info::SetSecurityInfo;
 
 #[cfg(test)]
