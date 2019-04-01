@@ -98,6 +98,8 @@ impl SecurityDescriptor {
 impl fmt::Debug for SecurityDescriptor {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_map()
+            .entry(&"owner", &self.owner())
+            .entry(&"group", &self.group())
             .entry(&"sddl", &self.as_sddl().unwrap())
             .finish()
     }
