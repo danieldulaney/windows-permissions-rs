@@ -12,8 +12,8 @@ use winapi::shared::winerror::ERROR_SUCCESS;
 ///
 /// Panics if the underlying call reports success but yields a null pointer.
 #[allow(non_snake_case)]
-pub fn GetNamedSecurityInfo(
-    name: &OsStr,
+pub fn GetNamedSecurityInfo<S: AsRef<OsStr> + ?Sized>(
+    name: &S,
     obj_type: SeObjectType,
     sec_info: SecurityInformation,
 ) -> io::Result<LocalBox<SecurityDescriptor>> {
