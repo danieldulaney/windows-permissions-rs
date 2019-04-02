@@ -17,3 +17,4 @@ bitflags = "1"
 
 [dev-dependencies]
 itertools = "0.8"
+tempfile = "3"
