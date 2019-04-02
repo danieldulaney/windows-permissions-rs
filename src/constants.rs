@@ -73,14 +73,13 @@ constant_enum!(AceType; u8;
                ACCESS_ALLOWED_OBJECT_ACE_TYPE,
                ACCESS_DENIED_ACE_TYPE,
                ACCESS_DENIED_CALLBACK_ACE_TYPE,
+               ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE,
                ACCESS_DENIED_OBJECT_ACE_TYPE,
                SYSTEM_AUDIT_ACE_TYPE,
                SYSTEM_AUDIT_CALLBACK_ACE_TYPE,
                SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE,
                SYSTEM_AUDIT_OBJECT_ACE_TYPE,
                SYSTEM_MANDATORY_LABEL_ACE_TYPE,
-               SYSTEM_ALARM_ACE_TYPE,
-               SYSTEM_ALARM_OBJECT_ACE_TYPE,
                SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE,
                SYSTEM_SCOPED_POLICY_ID_ACE_TYPE);
 
@@ -159,6 +158,23 @@ bitflags! {
         const Bit13 = 1 << 13;
         const Bit14 = 1 << 14;
         const Bit15 = 1 << 15;
+
+        // File-specific access rights
+        const FileAllAccess = FILE_ALL_ACCESS;
+        const FileGenericRead = FILE_GENERIC_READ;
+        const FileGenericWrite = FILE_GENERIC_WRITE;
+        const FileGenericExecute = FILE_GENERIC_EXECUTE;
+
+        // Key-specific access rights
+        const KeyAllAccess = KEY_ALL_ACCESS;
+        const KeyRead = KEY_READ;
+        const KeyWrite = KEY_WRITE;
+        const KeyExecute = KEY_EXECUTE;
+
+        // Mandatory label access rights
+        const MandatoryLabelNoReadUp = SYSTEM_MANDATORY_LABEL_NO_READ_UP;
+        const MandatoryLabelNoWriteUp = SYSTEM_MANDATORY_LABEL_NO_WRITE_UP;
+        const MandatoryLabelNoExecuteUp = SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP;
     }
 }
 
