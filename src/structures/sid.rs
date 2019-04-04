@@ -3,7 +3,7 @@ use std::fmt;
 use std::io;
 use std::str::FromStr;
 
-/// A reference to a SID
+/// A SID (Security Identifier) that can be used with Windows API calls.
 #[repr(C)]
 pub struct Sid {
     _opaque: [u8; 0],
@@ -92,7 +92,7 @@ impl Sid {
     /// use windows_permissions::{Sid, LocalBox};
     ///
     /// let sid: LocalBox<Sid> = "S-1-5-12-62341".parse().unwrap();
-    /// 
+    ///
     /// assert_eq!(sid.sub_authority(0), Some(12));
     /// assert_eq!(sid.sub_authority(1), Some(62341));
     /// assert_eq!(sid.sub_authority(2), None);

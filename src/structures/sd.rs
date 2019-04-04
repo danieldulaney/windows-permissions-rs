@@ -5,6 +5,7 @@ use std::fmt;
 use std::io;
 use std::str::FromStr;
 
+#[repr(C)]
 pub struct SecurityDescriptor {
     _opaque: [u8; 0],
 }
@@ -31,12 +32,34 @@ impl SecurityDescriptor {
     }
 
     /// Get the owner SID if it exists
+    ///
+    /// ```
+    /// use windows_permissions::{LocalBox, SecurityDescriptor, Sid};
+    ///
+    /// let sd1: LocalBox<SecurityDescriptor> = "O:S-1-5-10-20".parse().unwrap();
+    /// let sd2: LocalBox<SecurityDescriptor> = "G:S-1-5-10-20".parse().unwrap();
+    ///
+    /// assert_eq!(sd1.owner().unwrap(),
+    ///     &*Sid::new([0, 0, 0, 0, 0, 5], &[10, 20]).unwrap());
+    /// assert_eq!(sd2.owner(), None);
+    /// ```
     pub fn owner(&self) -> Option<&Sid> {
         wrappers::GetSecurityDescriptorOwner(self)
             .expect("Valid SecurityDescriptor failed to get owner")
     }
 
     /// Get the group SID if it exists
+    ///
+    /// ```
+    /// use windows_permissions::{LocalBox, SecurityDescriptor, Sid};
+    ///
+    /// let sd1: LocalBox<SecurityDescriptor> = "G:S-1-5-10-20".parse().unwrap();
+    /// let sd2: LocalBox<SecurityDescriptor> = "O:S-1-5-10-20".parse().unwrap();
+    ///
+    /// assert_eq!(sd1.group().unwrap(),
+    ///     &*Sid::new([0, 0, 0, 0, 0, 5], &[10, 20]).unwrap());
+    /// assert_eq!(sd2.group(), None);
+    /// ```
     pub fn group(&self) -> Option<&Sid> {
         wrappers::GetSecurityDescriptorGroup(self)
             .expect("Valid SecurityDescriptor failed to get group")

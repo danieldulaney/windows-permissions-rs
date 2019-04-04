@@ -89,8 +89,12 @@ impl<'s> Trustee<'s> {
                     ))
                 }
             }
-            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_SID => TrusteeSubject::ObjectsAndSid(ptr as *const _),
-            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_NAME => TrusteeSubject::ObjectsAndName(ptr as *const _),
+            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_SID => {
+                TrusteeSubject::ObjectsAndSid(ptr as *const _)
+            }
+            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_NAME => {
+                TrusteeSubject::ObjectsAndName(ptr as *const _)
+            }
             TrusteeForm::TRUSTEE_BAD_FORM => TrusteeSubject::Bad,
         }
     }

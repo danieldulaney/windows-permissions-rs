@@ -1,41 +1,15 @@
 use crate::{constants, wrappers, Ace, Trustee};
 use std::fmt;
 use std::io;
-use std::mem;
-use std::ptr::NonNull;
 use winapi::shared::winerror::ERROR_INVALID_PARAMETER;
-use winapi::um::winnt::ACL;
 
+/// An access control list (ACL).
 #[repr(C)]
 pub struct Acl {
-    inner: ACL,
-}
-
-impl Drop for Acl {
-    fn drop(&mut self) {
-        unreachable!("Acl should only be borrowed")
-    }
+    _opaque: [u8; 0],
 }
 
 impl Acl {
-    /// Get a reference from an ACL pointer.
-    ///
-    /// ## Requirements
-    ///
-    /// - `ptr` must point to a valid ACL structure
-    /// - The ACL header must be followed by the correct number of ACEs
-    /// - The entire structure must remain alive at least as long as `'s`
-    pub unsafe fn ref_from_nonnull<'s>(ptr: NonNull<ACL>) -> &'s Acl {
-        let acl_ref: &Acl = mem::transmute(ptr);
-        debug_assert!(wrappers::IsValidAcl(acl_ref));
-        acl_ref
-    }
-
-    /// Get a pointer to the underlying ACL structure
-    pub fn as_ptr(&self) -> *mut ACL {
-        &self.inner as *const _ as *mut _
-    }
-
     /// Determine what rights the given `Trustee` has under this ACL
     pub fn effective_rights(
         &self,

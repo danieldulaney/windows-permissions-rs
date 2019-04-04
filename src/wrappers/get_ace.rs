@@ -10,9 +10,11 @@ use std::ptr::{null_mut, NonNull};
 /// documented.
 #[allow(non_snake_case)]
 pub fn GetAce(acl: &Acl, index: u32) -> io::Result<&Ace> {
+    debug_assert!(crate::wrappers::IsValidAcl(acl));
+
     let mut ace = null_mut();
 
-    let result = unsafe { winapi::um::securitybaseapi::GetAce(acl.as_ptr(), index, &mut ace) };
+    let result = unsafe { winapi::um::securitybaseapi::GetAce(acl as *const _ as *mut _, index, &mut ace) };
 
     if result == 0 {
         // Failed

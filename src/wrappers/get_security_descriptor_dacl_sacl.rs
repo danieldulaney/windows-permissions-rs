@@ -1,6 +1,6 @@
 use crate::{wrappers, Acl, SecurityDescriptor};
 use std::io;
-use std::ptr::{null_mut, NonNull};
+use std::ptr::null_mut;
 use winapi::um::winnt::PACL;
 
 macro_rules! get_security_descriptor_acl {
@@ -31,9 +31,11 @@ macro_rules! get_security_descriptor_acl {
                 } else {
                     // Present
                     let acl = unsafe {
-                        Acl::ref_from_nonnull(
-                            NonNull::new(acl_ptr).expect("$f indicated success but returned NULL"),
-                        )
+                        if acl_ptr.is_null() {
+                            panic!("$f indicated success but returned NULL");
+                        } else {
+                            &*(acl_ptr as *const _)
+                        }
                     };
 
                     debug_assert!(wrappers::IsValidAcl(acl));

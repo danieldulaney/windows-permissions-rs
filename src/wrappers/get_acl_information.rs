@@ -17,7 +17,7 @@ pub fn GetAclInformationSize(acl: &Acl) -> io::Result<ACL_SIZE_INFORMATION> {
 
     let result = unsafe {
         winapi::um::securitybaseapi::GetAclInformation(
-            acl.as_ptr() as *mut _,
+            acl as *const _ as *mut _,
             &mut info as *mut _ as *mut _,
             info_size,
             winapi::um::winnt::AclSizeInformation,
