@@ -1,25 +1,37 @@
 use crate::{wrappers, LocalBox};
 use std::fmt;
 use std::io;
-use std::ptr::NonNull;
 use std::str::FromStr;
-use winapi::ctypes::c_void;
-use winapi::um::winnt::SID;
 
 /// A reference to a SID
 #[repr(C)]
 pub struct Sid {
-    _inner: SID,
-}
-
-impl Drop for Sid {
-    fn drop(&mut self) {
-        unreachable!("Sid should only be borrowed, not owned")
-    }
+    _opaque: [u8; 0],
 }
 
 impl Sid {
-    /// Create a new well-known SID from raw parts
+    /// Create a new SID from raw parts
+    ///
+    /// ```
+    /// use windows_permissions::Sid;
+    ///
+    /// let sid_8 = Sid::new([1, 2, 3, 4, 5, 6], &[1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
+    ///
+    /// assert_eq!(sid_8.id_authority(), &[1, 2, 3, 4, 5, 6]);
+    /// assert_eq!(sid_8.sub_authority_count(), 8);
+    /// assert_eq!(sid_8.sub_authorities(), &[1, 2, 3, 4, 5, 6, 7, 8]);
+    /// ```
+    ///
+    /// No more than 8 sub-authorities can be made using this function. If more
+    /// are needed, you can parse SDDL or use a wrapper function directly.
+    ///
+    /// ```
+    /// use windows_permissions::Sid;
+    ///
+    /// assert!(Sid::new([1, 2, 3, 4, 5, 6], &[1, 2, 3, 4, 5, 6, 7, 8]).is_ok());
+    /// assert!(Sid::new([1, 2, 3, 4, 5, 6], &[1, 2, 3, 4, 5, 6, 7, 8, 9]).is_err());
+    /// ```
+    ///
     pub fn new(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Result<LocalBox<Sid>> {
         wrappers::AllocateAndInitializeSid(id_auth, sub_auths)
     }
@@ -28,46 +40,63 @@ impl Sid {
     ///
     /// This is equivalent to calling `wrappers::CreateWellKnownSid` with
     /// `None` as the domain.
+    ///
+    /// ```
+    /// use windows_permissions::{Sid, LocalBox};
+    /// use winapi::um::winnt::WinWorldSid;
+    ///
+    /// let win_world_sid = Sid::well_known_sid(WinWorldSid).unwrap();
+    /// let another_sid = "S-1-1-0".parse().unwrap();
+    ///
+    /// assert_eq!(win_world_sid, another_sid);
+    /// ```
     pub fn well_known_sid(well_known_sid_type: u32) -> io::Result<LocalBox<Sid>> {
         wrappers::CreateWellKnownSid(well_known_sid_type, None)
     }
 
-    /// Get `&Sid` from a `NonNull`
-    ///
-    /// The resulting reference lives as long as the given lifetime.
-    ///
-    /// ## Requirements
-    ///
-    /// - `ptr` points to a valid SID
-    /// - No mutable references exist to the SID
-    /// - `ptr` remains valid at least as long as `'s`
-    /// - The backing memory is free'd using some other alias
-    ///
-    /// It's worth
-    /// noting that a SID does not have a static size -- the size of the
-    /// SID, and therefore the memory area covered by these requirements,
-    /// will depend on the contents of that memory area. Therefore, it is
-    /// strongly encouraged that `ref_from_nonnull` is only called with
-    /// pointers returned by WinAPI calls.
-    pub unsafe fn ref_from_nonnull<'s>(ptr: NonNull<c_void>) -> &'s Sid {
-        let sid_ref = std::mem::transmute::<NonNull<c_void>, &Sid>(ptr);
-        debug_assert!(wrappers::IsValidSid(sid_ref));
-        sid_ref
-    }
-
     /// Get the number of sub-authorities in the SID
+    ///
+    /// ```
+    /// use windows_permissions::{Sid, LocalBox};
+    ///
+    /// let sid1: LocalBox<Sid> = "S-1-5-1".parse().unwrap();
+    /// let sid2: LocalBox<Sid> = "S-1-5-1-2-3-4-5-6-7-8-9-10-11-12-13-14-15".parse().unwrap();
+    ///
+    /// assert_eq!(sid1.sub_authority_count(), 1);
+    /// assert_eq!(sid2.sub_authority_count(), 15);
+    /// ```
     pub fn sub_authority_count(&self) -> u8 {
         wrappers::GetSidSubAuthorityCount(self)
     }
 
-    /// Get the ID authority in the SID
+    /// Get the ID authority of the SID
+    ///
+    /// ```
+    /// use windows_permissions::{Sid, LocalBox};
+    ///
+    /// let sid1: LocalBox<Sid> = "S-1-5-12-62341".parse().unwrap();
+    /// let sid2: LocalBox<Sid> = "S-1-211111900160837-1".parse().unwrap();
+    ///
+    /// assert_eq!(sid1.id_authority(), &[0, 0, 0, 0, 0, 5]);
+    /// assert_eq!(sid2.id_authority(), &[0xC0, 0x01, 0x51, 0xD1, 0x23, 0x45]);
+    /// ```
     pub fn id_authority(&self) -> &[u8; 6] {
         wrappers::GetSidIdentifierAuthority(self)
     }
 
-    /// Get a sub-authority in the SID if it is available
+    /// Get a sub-authority of the SID if it is available
     ///
     /// Returns `None` if the SID has too few sub-authorities.
+    ///
+    /// ```
+    /// use windows_permissions::{Sid, LocalBox};
+    ///
+    /// let sid: LocalBox<Sid> = "S-1-5-12-62341".parse().unwrap();
+    /// 
+    /// assert_eq!(sid.sub_authority(0), Some(12));
+    /// assert_eq!(sid.sub_authority(1), Some(62341));
+    /// assert_eq!(sid.sub_authority(2), None);
+    /// ```
     pub fn sub_authority(&self, index: u8) -> Option<u32> {
         wrappers::GetSidSubAuthorityChecked(self, index)
     }

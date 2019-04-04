@@ -75,7 +75,7 @@ impl<'s> Trustee<'s> {
                 let ptr =
                     NonNull::new(ptr).expect("Null SID pointer on Trustee with TRUSTEE_IS_SID");
 
-                unsafe { TrusteeSubject::Sid(Sid::ref_from_nonnull(ptr)) }
+                unsafe { TrusteeSubject::Sid(&*ptr.as_ptr()) }
             }
             TrusteeForm::TRUSTEE_IS_NAME => {
                 let ptr =
@@ -89,8 +89,8 @@ impl<'s> Trustee<'s> {
                     ))
                 }
             }
-            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_SID => TrusteeSubject::ObjectsAndSid(ptr),
-            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_NAME => TrusteeSubject::ObjectsAndName(ptr),
+            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_SID => TrusteeSubject::ObjectsAndSid(ptr as *const _),
+            TrusteeForm::TRUSTEE_IS_OBJECTS_AND_NAME => TrusteeSubject::ObjectsAndName(ptr as *const _),
             TrusteeForm::TRUSTEE_BAD_FORM => TrusteeSubject::Bad,
         }
     }

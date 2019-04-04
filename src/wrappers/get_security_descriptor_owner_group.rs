@@ -22,7 +22,7 @@ pub fn GetSecurityDescriptorOwner(sd: &SecurityDescriptor) -> io::Result<Option<
         return Err(io::Error::last_os_error());
     }
 
-    Ok(NonNull::new(sid_ptr).map(|p| unsafe { Sid::ref_from_nonnull(p) }))
+    Ok(NonNull::new(sid_ptr).map(|p| unsafe { &*(p.as_ptr() as *const Sid) }))
 }
 
 /// Wraps GetSecurityDescriptorGroup
@@ -44,5 +44,5 @@ pub fn GetSecurityDescriptorGroup(sd: &SecurityDescriptor) -> io::Result<Option<
         return Err(io::Error::last_os_error());
     }
 
-    Ok(NonNull::new(sid_ptr).map(|p| unsafe { Sid::ref_from_nonnull(p) }))
+    Ok(NonNull::new(sid_ptr).map(|p| unsafe { &*(p.as_ptr() as *const Sid) }))
 }

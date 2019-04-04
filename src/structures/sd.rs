@@ -1,16 +1,12 @@
-use crate::constants::{SeObjectType, SecurityInformation};
+use crate::constants::SecurityInformation;
 use crate::{wrappers, Acl, LocalBox, Sid};
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::fmt;
-use std::fs::File;
 use std::io;
-use std::ptr::NonNull;
 use std::str::FromStr;
-use winapi::ctypes::c_void;
-use winapi::um::winnt::SECURITY_DESCRIPTOR;
 
 pub struct SecurityDescriptor {
-    _inner: SECURITY_DESCRIPTOR,
+    _opaque: [u8; 0],
 }
 
 impl Drop for SecurityDescriptor {
@@ -20,42 +16,6 @@ impl Drop for SecurityDescriptor {
 }
 
 impl SecurityDescriptor {
-    /// Get the security descriptor for a file at a given path
-    ///
-    /// This is a direct call to `wrappers::GetNamedSecurityInfo` with some
-    /// default parameters. For more options (such as fetching a partial
-    /// descriptor, or getting descriptors for other objects), call that method
-    /// directly.
-    pub fn lookup_path<S: AsRef<OsStr> + ?Sized>(
-        path: &S,
-    ) -> io::Result<LocalBox<SecurityDescriptor>> {
-        wrappers::GetNamedSecurityInfo(
-            path.as_ref(),
-            SeObjectType::SE_FILE_OBJECT,
-            SecurityInformation::Dacl | SecurityInformation::Owner | SecurityInformation::Group,
-        )
-    }
-
-    /// Get the security descriptor for a file
-    ///
-    /// This is a direct call to `wrappers::GetSecurityInfo` with some default
-    /// parameters. For more options, call that method directly.
-    pub fn lookup_file(file: &File) -> io::Result<LocalBox<SecurityDescriptor>> {
-        wrappers::GetSecurityInfo(
-            file,
-            SeObjectType::SE_FILE_OBJECT,
-            SecurityInformation::Dacl | SecurityInformation::Owner | SecurityInformation::Group,
-        )
-    }
-}
-
-impl SecurityDescriptor {
-    pub unsafe fn ref_from_nonnull<'s>(ptr: NonNull<c_void>) -> &'s Self {
-        let sd_ref = std::mem::transmute::<NonNull<c_void>, &Self>(ptr);
-        debug_assert!(wrappers::IsValidSecurityDescriptor(sd_ref));
-        sd_ref
-    }
-
     /// Get the Security Descriptor Definition Language (SDDL) string
     /// corresponding to this `SecurityDescriptor`
     ///
@@ -117,6 +77,7 @@ impl FromStr for LocalBox<SecurityDescriptor> {
 mod test {
     use super::*;
     use crate::LocalBox;
+    use std::ffi::OsStr;
     use std::ops::Deref;
 
     static SDDL_TEST_CASES: &[(&str, &str, &str)] = &[
