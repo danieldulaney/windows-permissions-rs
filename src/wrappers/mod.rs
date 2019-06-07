@@ -12,6 +12,7 @@
 // test code in those sub-modules. However, tests that require multiple
 // wrapped calls should be placed here.
 
+mod add_ace;
 mod allocate_and_initialize_sid;
 mod build_trustee_with_name;
 mod build_trustee_with_sid;
@@ -21,6 +22,7 @@ mod convert_string_security_descriptor_to_security_descriptor;
 mod convert_string_sid_to_sid;
 mod copy_sid;
 mod create_well_known_sid;
+mod delete_ace;
 mod equal_sid;
 mod get_ace;
 mod get_acl_information;
@@ -42,6 +44,7 @@ mod lookup_account_sid;
 mod set_named_security_info;
 mod set_security_info;
 
+pub use add_ace::AddAce;
 pub use allocate_and_initialize_sid::AllocateAndInitializeSid;
 pub use build_trustee_with_name::{BuildTrusteeWithName, BuildTrusteeWithNameOsStr};
 pub use build_trustee_with_sid::BuildTrusteeWithSid;
@@ -51,6 +54,7 @@ pub use convert_string_security_descriptor_to_security_descriptor::ConvertString
 pub use convert_string_sid_to_sid::ConvertStringSidToSid;
 pub use copy_sid::CopySid;
 pub use create_well_known_sid::CreateWellKnownSid;
+pub use delete_ace::DeleteAce;
 pub use equal_sid::EqualSid;
 pub use get_ace::GetAce;
 pub use get_acl_information::GetAclInformationSize;

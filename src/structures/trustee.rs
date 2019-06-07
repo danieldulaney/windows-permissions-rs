@@ -130,7 +130,7 @@ mod tests {
         use std::ops::Deref;
 
         for (sid, _, _) in Sid::test_sids() {
-            let trustee: Trustee = (sid.deref()).into();
+            let trustee: Trustee = sid.as_ref().into();
 
             match trustee.get_subject() {
                 TrusteeSubject::Sid(s) => assert_eq!(s, sid.deref()),

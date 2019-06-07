@@ -1,3 +1,5 @@
+#![allow(non_upper_case_globals)]
+
 use winapi::um::accctrl::*;
 use winapi::um::minwinbase::*;
 use winapi::um::winnt::*;
@@ -82,6 +84,10 @@ constant_enum!(AceType; u8;
                SYSTEM_MANDATORY_LABEL_ACE_TYPE,
                SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE,
                SYSTEM_SCOPED_POLICY_ID_ACE_TYPE);
+
+constant_enum!(AclRevision; u8;
+               ACL_REVISION,
+               ACL_REVISION_DS);
 
 bitflags! {
     pub struct AceFlags: u8 {
