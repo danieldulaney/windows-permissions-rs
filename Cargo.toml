@@ -3,6 +3,12 @@ name = "windows-permissions"
 version = "0.1.0"
 authors = ["Daniel Dulaney <dan@dulaney.xyz>"]
 edition = "2018"
+description = "Safe Windows API bindings for permissions, users, SIDs, ACLs, and more"
+repository = "https://github.com/danieldulaney"
+readme = "README.md"
+keywords = ["windows", "security", "permissions"]
+categories = ["api-bindings", "authentication", "os::windows-apis"]
+license = "MIT"
 
 [dependencies]
 winapi = { version = "0.3.6", features = [
