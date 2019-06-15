@@ -1,10 +1,10 @@
 [package]
 name = "windows-permissions"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Daniel Dulaney <dan@dulaney.xyz>"]
 edition = "2018"
-description = "Safe Windows API bindings for permissions, users, SIDs, ACLs, and more"
-repository = "https://github.com/danieldulaney"
+description = "Safe Rust bindings to Windows permissions APIs"
+repository = "https://github.com/danieldulaney/windows-permissions-rs"
 readme = "README.md"
 keywords = ["windows", "security", "permissions"]
 categories = ["api-bindings", "authentication", "os::windows-apis"]
