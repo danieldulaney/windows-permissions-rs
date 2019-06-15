@@ -1,5 +1,11 @@
 # Windows permissions
 
+Safe Rust bindings to Windows permissions APIs.
+
+[![Build Status](https://travis-ci.com/danieldulaney/windows-permissions-rs.svg?branch=master)](https://travis-ci.com/danieldulaney/windows-permissions-rs)
+
+## Overview
+
 This crate provides safe Rust wrappers over several Windows permissions concepts,
 including:
 
@@ -17,6 +23,9 @@ There are two kinds of abstractions:
 ## Contributing
 
 PRs are happily accepted! In general, `unsafe` code should be confined to the
-`wrappers` module -- the rest of this crate should be implemented in
-safe ways based on that code. Additionally, please include tests for any
-functionality you add.
+`wrappers` module -- the rest of this crate should be implemented 
+safely based on that code.
+
+Help wanted
+- Make `wrappers` more complete with additional Windows API functions
+- Add new data structures that cover more of the permissions APIs

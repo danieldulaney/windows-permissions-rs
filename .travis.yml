@@ -1,10 +1,15 @@
 language: rust
-os: windows
-rust:
-    - stable
-    - beta
-    - nightly
+cache: cargo
 matrix:
     allow_failures:
         - rust: nightly
     fast_finish: true
+    include:
+        - os: windows
+          rust: stable
+        - os: windows
+          rust: beta
+        - os: windows
+          rust: nightly
+        - os: linux
+          rust: stable
