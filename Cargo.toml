@@ -1,6 +1,6 @@
 [package]
 name = "windows-permissions"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Daniel Dulaney <dan@dulaney.xyz>"]
 edition = "2018"
 description = "Safe Windows API bindings for permissions, users, SIDs, ACLs, and more"
