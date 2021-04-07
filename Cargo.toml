@@ -12,6 +12,7 @@ license = "MIT"
 
 [dependencies]
 winapi = { version = "0.3.6", features = [
+    "std",
     "aclapi",
     "handleapi",
     "sddl",
