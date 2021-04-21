@@ -11,7 +11,7 @@ categories = ["api-bindings", "authentication", "os::windows-apis"]
 license = "MIT"
 
 [dependencies]
-winapi = { version = "0.3.6", features = [
+winapi = { version = "0.3.9", features = [
     "std",
     "aclapi",
     "handleapi",
