@@ -5,6 +5,11 @@ use std::mem;
 use std::ptr::NonNull;
 use winapi::um::winnt::ACE_HEADER;
 
+/// An access control list.
+///
+/// See [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header)
+/// for layout details, or [ACCESS_ALLOWED_ACE on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-access_allowed_ace)
+/// for an example.
 #[repr(C)]
 pub struct Ace {
     header: ACE_HEADER,

@@ -19,21 +19,24 @@ pub struct Trustee<'s> {
     _phantom: PhantomData<TrusteeSubject<'s>>,
 }
 
-/// The contents of a Trustee
-///
-/// `Sid` is easy: This Trustee holds a reference to the Sid it was created
-/// with.
-///
-/// `Name` holds a nul-terminated WTF-16-encoded name. It can be converted into
-/// an `OsString` using `utilities::os_from_buf`.
-///
-/// `Bad` means that `trusteeForm` is explicitly set to `TRUSTEE_BAD_FORM`
+/// The contents of a Trustee.
 #[derive(Debug)]
 pub enum TrusteeSubject<'s> {
+    /// This trustee holds a zero-terminated WTF-16-encoded name. This can be
+    /// converted into an [`OsString`](`std::ffi::OsString`) using
+    /// [`utilities::os_from_buf`].
     Name(&'s [u16]),
+
+    /// This trustee holds a reference to the Sid it was created with.
     Sid(&'s Sid),
+
+    /// An opaque pointer to objects and SID.
     ObjectsAndSid(*const c_void),
+
+    /// An opaque pointer to objects and name.
     ObjectsAndName(*const c_void),
+
+    /// `Bad` means that `trusteeForm` is explicitly set to `TRUSTEE_BAD_FORM`
     Bad,
 }
 
@@ -122,8 +125,7 @@ impl<'s> fmt::Debug for Trustee<'s> {
 mod tests {
     use super::*;
 
-    const TRUSTEE_NAMES: &[&'static str] =
-        &["test_name", r"domain\username", "a_unicode_char: 💩"];
+    const TRUSTEE_NAMES: &[&'static str] = &["test_name", r"domain\username", "a_unicode_char: 💩"];
 
     #[test]
     fn create_and_retrieve_sid_trustee() {

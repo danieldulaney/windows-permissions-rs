@@ -5,6 +5,12 @@ use std::fmt;
 use std::io;
 use std::str::FromStr;
 
+/// A Windows security descriptor.
+///
+/// This can only be accessed through a pointer, never constructed directly.
+///
+/// See [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-security_descriptor)
+/// for details.
 #[repr(C)]
 pub struct SecurityDescriptor {
     _opaque: [u8; 0],

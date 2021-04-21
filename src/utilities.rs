@@ -1,3 +1,5 @@
+//! Minor utilities for working with Windows APIs.
+
 use crate::{wrappers, LocalBox, Sid};
 use std::ffi::{OsStr, OsString};
 use std::io;

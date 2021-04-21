@@ -1,4 +1,7 @@
+//! Constants related to Windows security.
+
 #![allow(non_upper_case_globals)]
+#![allow(missing_docs)]
 
 use winapi::um::accctrl::*;
 use winapi::um::minwinbase::*;
@@ -7,10 +10,16 @@ use winapi::um::winnt::*;
 /// Create an enum from a list of constants. Generated enums get a method
 /// `from_raw` that allows them to be converted from a value.
 macro_rules! constant_enum {
-    ( $name:ident; $int:ident; $( $item:ident),* ) => {
+    ( $name:ident; $int:ident; msdn: $msdn:expr; $( $item:ident),* ) => {
+        constant_enum!($name; $int;
+            doc: concat!("See [MSDN](", $msdn, ").");
+            $( $item ),*);
+    };
+    ( $name:ident; $int:ident; doc: $doc:expr; $( $item:ident),* ) => {
         #[derive(Debug, PartialEq)]
         #[allow(non_camel_case_types)]
         #[repr(C)]
+        #[doc = $doc]
         pub enum $name {
 
         $(
@@ -31,65 +40,72 @@ macro_rules! constant_enum {
 }
 
 constant_enum!(TrusteeForm; u32;
-               TRUSTEE_IS_SID,
-               TRUSTEE_IS_NAME,
-               TRUSTEE_BAD_FORM,
-               TRUSTEE_IS_OBJECTS_AND_SID,
-               TRUSTEE_IS_OBJECTS_AND_NAME);
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-trustee_form";
+    TRUSTEE_IS_SID,
+    TRUSTEE_IS_NAME,
+    TRUSTEE_BAD_FORM,
+    TRUSTEE_IS_OBJECTS_AND_SID,
+    TRUSTEE_IS_OBJECTS_AND_NAME);
 
 constant_enum!(TrusteeType; u32;
-              TRUSTEE_IS_UNKNOWN,
-              TRUSTEE_IS_USER,
-              TRUSTEE_IS_GROUP,
-              TRUSTEE_IS_DOMAIN,
-              TRUSTEE_IS_ALIAS,
-              TRUSTEE_IS_WELL_KNOWN_GROUP,
-              TRUSTEE_IS_DELETED,
-              TRUSTEE_IS_INVALID,
-              TRUSTEE_IS_COMPUTER);
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-trustee_type";
+    TRUSTEE_IS_UNKNOWN,
+    TRUSTEE_IS_USER,
+    TRUSTEE_IS_GROUP,
+    TRUSTEE_IS_DOMAIN,
+    TRUSTEE_IS_ALIAS,
+    TRUSTEE_IS_WELL_KNOWN_GROUP,
+    TRUSTEE_IS_DELETED,
+    TRUSTEE_IS_INVALID,
+    TRUSTEE_IS_COMPUTER);
 
 constant_enum!(MultipleTrusteeOperation; u32;
-               NO_MULTIPLE_TRUSTEE,
-               TRUSTEE_IS_IMPERSONATE);
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-multiple_trustee_operation";
+    NO_MULTIPLE_TRUSTEE,
+    TRUSTEE_IS_IMPERSONATE);
 
 constant_enum!(SeObjectType; u32;
-               SE_UNKNOWN_OBJECT_TYPE,
-               SE_FILE_OBJECT,
-               SE_SERVICE,
-               SE_PRINTER,
-               SE_REGISTRY_KEY,
-               SE_LMSHARE,
-               SE_KERNEL_OBJECT,
-               SE_WINDOW_OBJECT,
-               SE_DS_OBJECT,
-               SE_DS_OBJECT_ALL,
-               SE_PROVIDER_DEFINED_OBJECT,
-               SE_WMIGUID_OBJECT,
-               SE_REGISTRY_WOW64_32KEY,
-               SE_REGISTRY_WOW64_64KEY);
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-se_object_type";
+    SE_UNKNOWN_OBJECT_TYPE,
+    SE_FILE_OBJECT,
+    SE_SERVICE,
+    SE_PRINTER,
+    SE_REGISTRY_KEY,
+    SE_LMSHARE,
+    SE_KERNEL_OBJECT,
+    SE_WINDOW_OBJECT,
+    SE_DS_OBJECT,
+    SE_DS_OBJECT_ALL,
+    SE_PROVIDER_DEFINED_OBJECT,
+    SE_WMIGUID_OBJECT,
+    SE_REGISTRY_WOW64_32KEY,
+    SE_REGISTRY_WOW64_64KEY);
 
 constant_enum!(AceType; u8;
-               ACCESS_ALLOWED_ACE_TYPE,
-               ACCESS_ALLOWED_CALLBACK_ACE_TYPE,
-               ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE,
-               ACCESS_ALLOWED_OBJECT_ACE_TYPE,
-               ACCESS_DENIED_ACE_TYPE,
-               ACCESS_DENIED_CALLBACK_ACE_TYPE,
-               ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE,
-               ACCESS_DENIED_OBJECT_ACE_TYPE,
-               SYSTEM_AUDIT_ACE_TYPE,
-               SYSTEM_AUDIT_CALLBACK_ACE_TYPE,
-               SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE,
-               SYSTEM_AUDIT_OBJECT_ACE_TYPE,
-               SYSTEM_MANDATORY_LABEL_ACE_TYPE,
-               SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE,
-               SYSTEM_SCOPED_POLICY_ID_ACE_TYPE);
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header#members";
+    ACCESS_ALLOWED_ACE_TYPE,
+    ACCESS_ALLOWED_CALLBACK_ACE_TYPE,
+    ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE,
+    ACCESS_ALLOWED_OBJECT_ACE_TYPE,
+    ACCESS_DENIED_ACE_TYPE,
+    ACCESS_DENIED_CALLBACK_ACE_TYPE,
+    ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE,
+    ACCESS_DENIED_OBJECT_ACE_TYPE,
+    SYSTEM_AUDIT_ACE_TYPE,
+    SYSTEM_AUDIT_CALLBACK_ACE_TYPE,
+    SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE,
+    SYSTEM_AUDIT_OBJECT_ACE_TYPE,
+    SYSTEM_MANDATORY_LABEL_ACE_TYPE,
+    SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE,
+    SYSTEM_SCOPED_POLICY_ID_ACE_TYPE);
 
 constant_enum!(AclRevision; u8;
-               ACL_REVISION,
-               ACL_REVISION_DS);
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-acl";
+    ACL_REVISION,
+    ACL_REVISION_DS);
 
 bitflags! {
+    /// See the `AceFlags` available at [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header).
     pub struct AceFlags: u8 {
         const ContainerInherit = CONTAINER_INHERIT_ACE;
         const ObjectInherit = OBJECT_INHERIT_ACE;
@@ -102,6 +118,7 @@ bitflags! {
 }
 
 bitflags! {
+    /// See [MSDN](https://docs.microsoft.com/en-us/windows/win32/secauthz/security-information).
     pub struct SecurityInformation: u32 {
         const Attribute = ATTRIBUTE_SECURITY_INFORMATION;
         const Backup = BACKUP_SECURITY_INFORMATION;
@@ -119,6 +136,10 @@ bitflags! {
 }
 
 bitflags! {
+    /// Flags indicating the right to access a resource.
+    ///
+    /// See [MSDN](https://docs.microsoft.com/en-us/windows/win32/secauthz/access-mask)
+    /// for details.
     pub struct AccessRights: u32 {
         // All
         const All = 0xFFFF_FFFF;
@@ -185,6 +206,9 @@ bitflags! {
 }
 
 bitflags! {
+    /// Flags indicating the settings for a local allocation.
+    ///
+    /// See the `uFlags` parameter at [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc#parameters).
     pub struct LocalAllocFlags: u32 {
         const Fixed = LMEM_FIXED;
         const Moveable = LMEM_MOVEABLE;
@@ -202,7 +226,7 @@ mod test {
     const C: u8 = 15;
     const INVALID: u8 = 100;
 
-    constant_enum!(TestEnum; u8; A, B, C);
+    constant_enum!(TestEnum; u8; doc: "This is a test"; A, B, C);
 
     #[test]
     fn constant_enum_works() {

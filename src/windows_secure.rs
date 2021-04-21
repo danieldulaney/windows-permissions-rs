@@ -4,6 +4,7 @@ use std::ffi::OsStr;
 use std::io;
 use std::os::windows::io::AsRawHandle;
 
+/// A trait indicating that an object is subject to Windows security.
 pub trait WindowsSecure {
     /// Get a security descriptor for the object
     fn security_descriptor(
@@ -57,6 +58,7 @@ pub trait WindowsSecure {
         Ok(())
     }
 
+    /// Set the object's security descriptor.
     fn set_security_descriptor(&mut self, sd: &SecurityDescriptor) -> io::Result<()> {
         self.set_multiple(sd.owner(), sd.group(), sd.dacl(), sd.sacl())
     }

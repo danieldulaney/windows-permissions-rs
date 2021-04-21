@@ -1,3 +1,5 @@
+//! A specialized [`Box`] variation for items stored on the local heap.
+
 use crate::constants::LocalAllocFlags;
 use std::cmp::PartialEq;
 use std::fmt;
@@ -5,6 +7,8 @@ use std::io;
 use std::ops::{Deref, DerefMut};
 use std::ptr::{null_mut, NonNull};
 
+/// A smart pointer to an object on the local heap.
+///
 /// Windows has several different options for allocation, and the local heap is
 /// no longer recommended. However, several of the
 /// WinAPI calls in this crate use the local heap, allocating with `LocalAlloc`
@@ -31,6 +35,8 @@ use std::ptr::{null_mut, NonNull};
 /// *local_ptr2 = 5u32;
 /// assert_eq!(local_ptr1, local_ptr2);
 /// ```
+///
+/// For details, see [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc#parameters).
 ///
 /// ## Exotically-sized types
 ///
