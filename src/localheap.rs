@@ -185,3 +185,6 @@ where
         self.deref().eq(other.deref())
     }
 }
+
+unsafe impl<U: Send> Send for LocalBox<U> {}
+unsafe impl<U: Sync> Sync for LocalBox<U> {}
