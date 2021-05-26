@@ -1,6 +1,7 @@
 //! A specialized [`Box`] variation for items stored on the local heap.
 
 use crate::constants::LocalAllocFlags;
+use std::borrow::{Borrow, BorrowMut};
 use std::cmp::PartialEq;
 use std::fmt;
 use std::hash::Hash;
@@ -160,6 +161,18 @@ where
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.deref().hash(state)
+    }
+}
+
+impl<T> Borrow<T> for LocalBox<T> {
+    fn borrow(&self) -> &T {
+        self.deref()
+    }
+}
+
+impl<T> BorrowMut<T> for LocalBox<T> {
+    fn borrow_mut(&mut self) -> &mut T {
+        self.deref_mut()
     }
 }
 
