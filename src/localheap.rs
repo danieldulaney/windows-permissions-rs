@@ -3,6 +3,7 @@
 use crate::constants::LocalAllocFlags;
 use std::cmp::PartialEq;
 use std::fmt;
+use std::hash::Hash;
 use std::io;
 use std::ops::{Deref, DerefMut};
 use std::ptr::{null_mut, NonNull};
@@ -153,6 +154,16 @@ impl<T: fmt::Debug> fmt::Debug for LocalBox<T> {
     }
 }
 
+impl<T> Hash for LocalBox<T>
+where
+    T: Hash
+{
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.deref().hash(state)
+    }
+}
+
+impl<T> Eq for LocalBox<T> where T: Eq {}
 impl<T, U> PartialEq<LocalBox<U>> for LocalBox<T>
 where
     T: PartialEq<U>,

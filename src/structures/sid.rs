@@ -1,4 +1,5 @@
 use crate::{wrappers, LocalBox};
+use std::hash::Hash;
 use std::fmt;
 use std::io;
 use std::str::FromStr;
@@ -198,6 +199,15 @@ impl fmt::Display for Sid {
     }
 }
 
+impl Hash for Sid {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id_authority().hash(state);
+        for index in 0..self.sub_authority_count() {
+            self.sub_authority(index).expect("Already checked count").hash(state);
+        }
+    }
+}
+
 impl FromStr for LocalBox<Sid> {
     type Err = io::Error;
 
@@ -206,6 +216,7 @@ impl FromStr for LocalBox<Sid> {
     }
 }
 
+impl Eq for Sid {}
 impl PartialEq for Sid {
     fn eq(&self, other: &Sid) -> bool {
         wrappers::EqualSid(self, other)
