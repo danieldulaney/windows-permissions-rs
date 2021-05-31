@@ -4,7 +4,7 @@ use std::io;
 use winapi::shared::winerror::ERROR_INVALID_PARAMETER;
 use winapi::um::winnt::ACL;
 
-/// An access control list (ACL).
+/// An entry in an access control list (ACL).
 #[repr(C)]
 pub struct Acl {
     _opaque: [u8; 0],
