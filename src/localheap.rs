@@ -162,5 +162,15 @@ where
     }
 }
 
+// Safety: LocalAlloc/LocalFree are wrapper functions that call the
+// corresponding heap functions (HeapAlloc/HeapFree) using a handle to the
+// process default heap. The HeapAlloc documentation states "Serialization
+// ensures mutual exclusion when two or more threads attempt to simultaneously
+// allocate or free blocks from the same heap." Serialization may be disabled
+// with the HEAP_NO_SERIALIZE flag, but its documentation states "This value
+// should not be specified when accessing the process's default heap." because
+// the system may arbitrarily create threads that accesses that heap. Hence, it
+// is safe to assume that LocalAlloc/LocalFree are serialized, and so LocalBox
+// are safe to share across threads.
 unsafe impl<U: Send> Send for LocalBox<U> {}
 unsafe impl<U: Sync> Sync for LocalBox<U> {}
