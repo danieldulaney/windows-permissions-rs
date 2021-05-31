@@ -1,6 +1,6 @@
 [package]
 name = "windows-permissions"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Daniel Dulaney <dan@dulaney.xyz>"]
 edition = "2018"
 description = "Safe Rust bindings to Windows permissions APIs"
