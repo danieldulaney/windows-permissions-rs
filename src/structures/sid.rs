@@ -1,6 +1,6 @@
 use crate::{wrappers, LocalBox};
-use std::hash::Hash;
 use std::fmt;
+use std::hash::Hash;
 use std::io;
 use std::str::FromStr;
 
@@ -39,7 +39,7 @@ impl Sid {
 
     /// Create a new well-known SID
     ///
-    /// This is equivalent to calling `wrappers::CreateWellKnownSid` with
+    /// This is equivalent to calling [`wrappers::CreateWellKnownSid`] with
     /// `None` as the domain.
     ///
     /// ```
@@ -203,7 +203,9 @@ impl Hash for Sid {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id_authority().hash(state);
         for index in 0..self.sub_authority_count() {
-            self.sub_authority(index).expect("Already checked count").hash(state);
+            self.sub_authority(index)
+                .expect("Already checked count")
+                .hash(state);
         }
     }
 }

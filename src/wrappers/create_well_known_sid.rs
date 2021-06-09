@@ -2,13 +2,22 @@ use crate::{wrappers, LocalBox, Sid};
 use std::io;
 use std::ptr::null_mut;
 
-/// Wraps CreateWellKnownSid
+/// Wraps [CreateWellKnownSid](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-createwellknownsid).
 ///
-/// Currently only supports creating SIDs with up to 8 subauthorities; longer
-/// SIDs will give an OS error (code 122).
+/// `sid_type` may be any value in [WELL_KNOWN_SID_TYPE](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-well_known_sid_type).
 ///
 /// If `domain_sid` is omitted, this has the same behavior as the underlying
 /// WinAPI function.
+///
+/// ```
+/// use windows_permissions::{wrappers, Sid, LocalBox};
+/// use winapi::um::winnt::WinWorldSid;
+///
+/// let win_world_sid = wrappers::CreateWellKnownSid(WinWorldSid, None).unwrap();
+/// let another_sid = "S-1-1-0".parse().unwrap();
+///
+/// assert_eq!(win_world_sid, another_sid);
+/// ```
 #[allow(non_snake_case)]
 pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result<LocalBox<Sid>> {
     // Optimistically reserve enough space for a fairly large SID
