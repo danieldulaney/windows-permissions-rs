@@ -3,7 +3,7 @@ use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps ConvertStringSecurityDescriptorToSecurityDescriptorW
+/// Wraps [`ConvertStringSecurityDescriptorToSecurityDescriptorW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertstringsecuritydescriptortosecuritydescriptorw)
 ///
 /// Always uses `SDDL_REVISION_1`
 #[allow(non_snake_case)]

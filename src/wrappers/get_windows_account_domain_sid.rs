@@ -2,7 +2,7 @@ use crate::{wrappers, LocalBox, Sid};
 use std::io;
 use winapi::shared::winerror::ERROR_INSUFFICIENT_BUFFER;
 
-/// Wraps `GetWindowsAccountDomainSid`
+/// Wraps [`GetWindowsAccountDomainSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getwindowsaccountdomainsid)
 #[allow(non_snake_case)]
 pub fn GetWindowsAccountDomainSid(sid: &Sid) -> io::Result<LocalBox<Sid>> {
     // 24 bytes is a typical size on x64

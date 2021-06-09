@@ -1,6 +1,6 @@
 use crate::Sid;
 
-/// Wraps EqualSid
+/// Wraps [`EqualSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-equalsid)
 ///
 /// Because `&Sid` is a safe Rust construct, it must be valid. Therefore, it is
 /// impossible for this function to error.

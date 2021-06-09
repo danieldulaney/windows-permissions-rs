@@ -4,8 +4,11 @@ use std::ptr::null_mut;
 use winapi::um::winnt::PACL;
 
 macro_rules! get_security_descriptor_acl {
-    ($f:ident) => {
-        /// Wraps GetSecurityDescriptorDacl
+    ($f:ident; msdn: $msdn:expr) => {
+        get_security_descriptor_acl!(@ $f, concat!("Wraps [`", stringify!($f), "`](", $msdn, ")"));
+    };
+    (@ $f:ident, $doc:expr) => {
+        #[doc = $doc]
         #[allow(non_snake_case)]
         pub fn $f(sd: &SecurityDescriptor) -> io::Result<Option<&Acl>> {
             let mut present = 0i32;
@@ -47,5 +50,8 @@ macro_rules! get_security_descriptor_acl {
     };
 }
 
-get_security_descriptor_acl!(GetSecurityDescriptorDacl);
-get_security_descriptor_acl!(GetSecurityDescriptorSacl);
+get_security_descriptor_acl!(GetSecurityDescriptorDacl;
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptordacl");
+
+get_security_descriptor_acl!(GetSecurityDescriptorSacl;
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptorsacl");

@@ -4,7 +4,7 @@ use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps ConvertStringSidToSidW
+/// Wraps [`ConvertStringSidToSidW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertstringsidtosidw)
 ///
 /// # Panics
 ///

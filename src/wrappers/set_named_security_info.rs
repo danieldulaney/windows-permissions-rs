@@ -5,7 +5,7 @@ use std::ffi::OsStr;
 use std::io;
 use winapi::shared::winerror::ERROR_SUCCESS;
 
-/// Wraps SetNamedSecurityInfoW
+/// Wraps [`SetNamedSecurityInfoW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-setnamedsecurityinfow)
 #[allow(non_snake_case)]
 pub fn SetNamedSecurityInfo<S: AsRef<OsStr> + ?Sized>(
     name: &S,

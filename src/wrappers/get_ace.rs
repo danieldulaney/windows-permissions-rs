@@ -2,7 +2,7 @@ use crate::{Ace, Acl};
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps GetAce
+/// Wraps [`GetAce`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getace)
 ///
 /// Requests beyond the last ACE will have the same behavior as the underlying
 /// WinAPI call. Experimentation suggests OS error code 87,

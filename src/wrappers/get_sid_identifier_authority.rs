@@ -1,6 +1,6 @@
 use crate::Sid;
 
-/// Wraps GetSidIdentifierAuthority
+/// Wraps [`GetSidIdentifierAuthority`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsididentifierauthority)
 #[allow(non_snake_case)]
 pub fn GetSidIdentifierAuthority(sid: &Sid) -> &[u8; 6] {
     let ptr = unsafe {

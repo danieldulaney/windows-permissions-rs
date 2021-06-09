@@ -6,7 +6,7 @@ use std::io;
 use std::ptr::null_mut;
 use std::slice;
 
-/// Wraps ConvertSecurityDescriptorToStringSecurityDescriptorW
+/// Wraps [`ConvertSecurityDescriptorToStringSecurityDescriptorW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertsecuritydescriptortostringsecuritydescriptorw)
 ///
 /// This always uses `SDDL_REVISION_1` as the SDDL revision.
 #[allow(non_snake_case)]

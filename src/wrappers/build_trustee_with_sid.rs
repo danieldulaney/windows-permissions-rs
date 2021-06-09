@@ -1,6 +1,6 @@
 use crate::{Sid, Trustee};
 
-/// Wraps BuildTrusteeWithSidW
+/// Wraps [`BuildTrusteeWithSidW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-buildtrusteewithsidw)
 #[allow(non_snake_case)]
 pub fn BuildTrusteeWithSid<'s>(sid: &'s Sid) -> Trustee<'s> {
     // Trustee must be initialized before return

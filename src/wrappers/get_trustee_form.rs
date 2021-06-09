@@ -1,9 +1,9 @@
 use crate::constants::TrusteeForm;
 use crate::Trustee;
 
-/// Wraps GetTrusteeFormW
+/// Wraps [`GetTrusteeFormW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-gettrusteeformw)
 ///
-/// Returns `Err` on invalid form with the raw content of the field
+/// If the form value is not recognized, returns `Err` with the raw value.
 #[allow(non_snake_case)]
 pub fn GetTrusteeForm<'s>(trustee: &Trustee<'s>) -> Result<TrusteeForm, u32> {
     let form = unsafe { winapi::um::aclapi::GetTrusteeFormW(trustee.as_ptr() as *mut _) };

@@ -2,7 +2,7 @@ use crate::utilities;
 use crate::Trustee;
 use std::ffi::OsStr;
 
-/// Wraps BuildTrusteeWithNameW
+/// Wraps [`BuildTrusteeWithNameW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-buildtrusteewithnamew)
 #[allow(non_snake_case)]
 pub fn BuildTrusteeWithName<'s>(name_buf: &'s [u16]) -> Trustee<'s> {
     let mut trustee = unsafe { Trustee::allocate() };

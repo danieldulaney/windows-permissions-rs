@@ -3,7 +3,7 @@ use std::io;
 use std::ptr::{null_mut, NonNull};
 use winapi::ctypes::c_void;
 
-/// Wraps GetSecurityDescriptorOwner
+/// Wraps [`GetSecurityDescriptorOwner`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptorowner)
 #[allow(non_snake_case)]
 pub fn GetSecurityDescriptorOwner(sd: &SecurityDescriptor) -> io::Result<Option<&Sid>> {
     let mut sid_ptr: *mut c_void = null_mut();
@@ -25,7 +25,7 @@ pub fn GetSecurityDescriptorOwner(sd: &SecurityDescriptor) -> io::Result<Option<
     Ok(NonNull::new(sid_ptr).map(|p| unsafe { &*(p.as_ptr() as *const Sid) }))
 }
 
-/// Wraps GetSecurityDescriptorGroup
+/// Wraps [`GetSecurityDescriptorGroup`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptorgroup)
 #[allow(non_snake_case)]
 pub fn GetSecurityDescriptorGroup(sd: &SecurityDescriptor) -> io::Result<Option<&Sid>> {
     let mut sid_ptr: *mut c_void = null_mut();

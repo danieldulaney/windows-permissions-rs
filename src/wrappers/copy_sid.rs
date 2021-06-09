@@ -1,7 +1,7 @@
 use crate::{wrappers, LocalBox, Sid};
 use std::io;
 
-/// Wraps CopySid
+/// Wraps [`CopySid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-copysid)
 #[allow(non_snake_case)]
 pub fn CopySid(sid: &Sid) -> io::Result<LocalBox<Sid>> {
     let size = wrappers::GetSidLengthRequired(wrappers::GetSidSubAuthorityCount(sid));

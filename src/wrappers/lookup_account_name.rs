@@ -24,6 +24,8 @@ const MAX_RETRIES: usize = 5;
 
 /// Wraps [`LookupAccountNameW`](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountnamew)
 ///
+/// Returns SID, referenced domain name, and use in that order.
+///
 /// ```
 /// # use windows_permissions::wrappers::LookupAccountName;
 /// # use windows_permissions::constants::SidNameUse;

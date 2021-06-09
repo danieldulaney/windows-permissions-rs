@@ -1,7 +1,7 @@
 use crate::{Ace, Acl};
 use std::io;
 
-/// Wraps `AddAce`
+/// Wraps [`AddAce`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-addace)
 ///
 /// This always uses the ACL_REVISION_DS revision, which should be compatible
 /// with all modern ACLs.

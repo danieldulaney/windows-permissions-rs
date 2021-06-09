@@ -2,9 +2,9 @@ use crate::{wrappers, LocalBox, Sid};
 use std::io;
 use std::ptr::null_mut;
 
-/// Wraps [CreateWellKnownSid](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-createwellknownsid).
+/// Wraps [`CreateWellKnownSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-createwellknownsid).
 ///
-/// `sid_type` may be any value in [WELL_KNOWN_SID_TYPE](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-well_known_sid_type).
+/// `sid_type` may be any value in [`WELL_KNOWN_SID_TYPE`](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-well_known_sid_type).
 ///
 /// If `domain_sid` is omitted, this has the same behavior as the underlying
 /// WinAPI function.

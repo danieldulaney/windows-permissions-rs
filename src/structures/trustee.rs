@@ -151,6 +151,8 @@ mod tests {
                 TrusteeSubject::Name(n) => assert_eq!(n, buffer.as_slice()),
                 _ => panic!("Expected to get back a TrusteeSubject::Name"),
             }
+
+            assert_eq!(wrappers::GetTrusteeName(&trustee), **name);
         }
     }
 }

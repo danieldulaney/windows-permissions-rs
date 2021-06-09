@@ -6,9 +6,9 @@ use std::ptr::{null, null_mut};
 
 const BUFFER_SIZE: u32 = 256;
 
-/// Wraps LookupAccountSidW
+/// Wraps [LookupAccountSidW](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountsidw)
 ///
-/// Returns (name, domain)
+/// Returns (name, domain).
 #[allow(non_snake_case)]
 pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), io::Error> {
     let mut name_size = BUFFER_SIZE;

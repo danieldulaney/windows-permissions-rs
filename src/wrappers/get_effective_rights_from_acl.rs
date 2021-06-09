@@ -1,7 +1,7 @@
 use crate::{constants::AccessRights, Acl, Trustee};
 use std::io;
 
-/// Wraps GetEffectiveRightsFromAclW
+/// Wraps [`GetEffectiveRightsFromAclW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-geteffectiverightsfromaclw)
 #[allow(non_snake_case)]
 pub fn GetEffectiveRightsFromAcl(acl: &Acl, trustee: &Trustee) -> Result<AccessRights, io::Error> {
     debug_assert!(crate::wrappers::IsValidAcl(acl));

@@ -6,7 +6,7 @@ use std::io;
 use std::ptr::{null_mut, NonNull};
 use winapi::shared::winerror::ERROR_SUCCESS;
 
-/// Wraps GetNamedSecurityInfoW
+/// Wraps [`GetNamedSecurityInfoW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getnamedsecurityinfow)
 ///
 /// ## Panics
 ///

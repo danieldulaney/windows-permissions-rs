@@ -4,7 +4,7 @@ use std::ffi::OsString;
 use std::io;
 use std::ptr::null_mut;
 
-/// Wraps ConvertSidtoStringSidW
+/// Wraps [`ConvertSidtoStringSidW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertsidtostringsidw)
 #[allow(non_snake_case)]
 pub fn ConvertSidToStringSid(sid: &Sid) -> io::Result<OsString> {
     let mut buf_ptr: *mut u16 = null_mut();

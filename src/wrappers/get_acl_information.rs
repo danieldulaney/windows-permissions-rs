@@ -2,7 +2,9 @@ use crate::Acl;
 use std::io;
 use winapi::um::winnt::ACL_SIZE_INFORMATION;
 
-/// Wraps GetAclInformation using ACL_SIZE_INFORMATION as the information class
+/// Wraps [`GetAclInformation`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getaclinformation)
+///
+/// Always uses [`ACL_SIZE_INFORMATION`](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-acl_size_information) as the information class.
 #[allow(non_snake_case)]
 pub fn GetAclInformationSize(acl: &Acl) -> io::Result<ACL_SIZE_INFORMATION> {
     debug_assert!(crate::wrappers::IsValidAcl(acl));

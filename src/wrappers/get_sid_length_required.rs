@@ -1,4 +1,4 @@
-/// Wraps GetSidLengthRequired
+/// Wraps [`GetSidLengthRequired`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsidlengthrequired)
 #[allow(non_snake_case)]
 pub fn GetSidLengthRequired(sub_auth_count: u8) -> usize {
     // Assumptions:

@@ -2,7 +2,7 @@ use crate::{LocalBox, Sid};
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps AllocateAndInitializeSid
+/// Wraps [`AllocateAndInitializeSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-allocateandinitializesid)
 ///
 /// Only the first 8 sub-authorities are considered. If sub_auths is 0, returns
 /// an error with `io::ErrorKind` of `InvalidData`. This is a workaround for

@@ -5,7 +5,7 @@ use std::os::windows::io::AsRawHandle;
 use std::ptr::{null_mut, NonNull};
 use winapi::shared::winerror::ERROR_SUCCESS;
 
-/// Wraps `GetSecurityInfo`
+/// Wraps [`GetSecurityInfo`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo)
 ///
 /// ## Panics
 ///

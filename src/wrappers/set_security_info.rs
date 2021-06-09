@@ -5,7 +5,7 @@ use std::io;
 use std::os::windows::io::AsRawHandle;
 use winapi::shared::winerror::ERROR_SUCCESS;
 
-/// Wraps `SetSecurityInfo`
+/// Wraps [`SetSecurityInfo`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-setsecurityinfo)
 ///
 /// The flags set in `sec_info` determines what parameters are set; others are
 /// ignored following the semantics laid out in the WinAPI docs.
