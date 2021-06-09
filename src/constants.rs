@@ -16,7 +16,7 @@ macro_rules! constant_enum {
             $( $item ),*);
     };
     ( $name:ident; $int:ident; doc: $doc:expr; $( $item:ident),* ) => {
-        #[derive(Debug, PartialEq)]
+        #[derive(Debug, PartialEq, Copy, Clone)]
         #[allow(non_camel_case_types)]
         #[repr(C)]
         #[doc = $doc]
@@ -103,6 +103,20 @@ constant_enum!(AclRevision; u8;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-acl";
     ACL_REVISION,
     ACL_REVISION_DS);
+
+constant_enum!(SidNameUse; u32;
+    msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-sid_name_use";
+    SidTypeUser,
+    SidTypeGroup,
+    SidTypeDomain,
+    SidTypeAlias,
+    SidTypeWellKnownGroup,
+    SidTypeDeletedAccount,
+    SidTypeInvalid,
+    SidTypeUnknown,
+    SidTypeComputer,
+    SidTypeLabel,
+    SidTypeLogonSession);
 
 bitflags! {
     /// See the `AceFlags` available at [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header).
