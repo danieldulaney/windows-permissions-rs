@@ -225,6 +225,15 @@ impl PartialEq for Sid {
     }
 }
 
+impl Clone for LocalBox<Sid> {
+    fn clone(&self) -> Self {
+        wrappers::CopySid(self)
+        // internally, CopySid is just memmove with a length check.
+        // This cannot panic unless allocation fails.
+            .expect("Failed to clone SID")
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
