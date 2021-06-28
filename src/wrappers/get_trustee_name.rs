@@ -4,7 +4,7 @@ use std::ffi::OsString;
 
 /// Wraps [`GetTrusteeNameW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-gettrusteenamew)
 #[allow(non_snake_case)]
-pub fn GetTrusteeName<'s>(trustee: &Trustee<'s>) -> OsString {
+pub fn GetTrusteeName(trustee: &Trustee) -> OsString {
     unsafe {
         let ptr = winapi::um::aclapi::GetTrusteeNameW(trustee.as_ptr() as *mut _);
         let len = search_buffer(&0, ptr);

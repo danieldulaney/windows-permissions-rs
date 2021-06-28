@@ -49,6 +49,7 @@ impl Acl {
     ///
     /// assert_eq!(sd.dacl().unwrap().len(), 2);
     /// ```
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> u32 {
         wrappers::GetAclInformationSize(self)
             .expect("GetAclInformation failed on valid ACL")

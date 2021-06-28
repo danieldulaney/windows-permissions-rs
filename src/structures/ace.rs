@@ -24,7 +24,7 @@ impl Drop for Ace {
 impl Ace {
     /// Get a reference from an ACE pointer.
     ///
-    /// ## Requirements
+    /// # Safety
     ///
     /// - `ptr` must point to a valid ACE structure
     /// - The ACE header must be followed by the correct ACE structure

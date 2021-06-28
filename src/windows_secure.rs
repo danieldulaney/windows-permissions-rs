@@ -132,16 +132,16 @@ where
     ) -> io::Result<()> {
         let sec_info = owner
             .map(|_| SecurityInformation::Owner)
-            .unwrap_or(SecurityInformation::empty())
+            .unwrap_or_else(SecurityInformation::empty)
             | group
                 .map(|_| SecurityInformation::Group)
-                .unwrap_or(SecurityInformation::empty())
+                .unwrap_or_else(SecurityInformation::empty)
             | group
                 .map(|_| SecurityInformation::Dacl)
-                .unwrap_or(SecurityInformation::empty())
+                .unwrap_or_else(SecurityInformation::empty)
             | group
                 .map(|_| SecurityInformation::Sacl)
-                .unwrap_or(SecurityInformation::empty());
+                .unwrap_or_else(SecurityInformation::empty);
 
         wrappers::SetSecurityInfo(
             self,
@@ -220,16 +220,16 @@ impl WindowsSecure for OsStr {
     ) -> io::Result<()> {
         let sec_info = owner
             .map(|_| SecurityInformation::Owner)
-            .unwrap_or(SecurityInformation::empty())
+            .unwrap_or_else(SecurityInformation::empty)
             | group
                 .map(|_| SecurityInformation::Group)
-                .unwrap_or(SecurityInformation::empty())
+                .unwrap_or_else(SecurityInformation::empty)
             | dacl
                 .map(|_| SecurityInformation::Dacl)
-                .unwrap_or(SecurityInformation::empty())
+                .unwrap_or_else(SecurityInformation::empty)
             | sacl
                 .map(|_| SecurityInformation::Sacl)
-                .unwrap_or(SecurityInformation::empty());
+                .unwrap_or_else(SecurityInformation::empty);
 
         wrappers::SetNamedSecurityInfo(
             self,

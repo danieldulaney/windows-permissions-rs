@@ -51,7 +51,12 @@ impl<'s> Trustee<'s> {
         &mut self.inner
     }
 
-    /// Allocate space for a Trustee
+    /// Allocate and zero-initialize space for a Trustee
+    ///
+    /// # Safety
+    ///
+    /// The Trustee is zero-initialized, and should only be used in contexts
+    /// where that is acceptable.
     pub unsafe fn allocate() -> Self {
         Self {
             inner: std::mem::zeroed(),
@@ -61,7 +66,7 @@ impl<'s> Trustee<'s> {
 
     /// Get the `TrusteeSubject` of a `Trustee`
     ///
-    /// ## Panics
+    /// # Panics
     ///
     /// Panics if the `trusteeForm` in the underlying object is an unrecognized
     /// value. To get the value, use `wrappers::GetTrusteeForm` directly.

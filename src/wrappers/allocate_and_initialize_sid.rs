@@ -11,7 +11,7 @@ use std::ptr::{null_mut, NonNull};
 /// as `ConvertStringSidToSid` will error.
 #[allow(non_snake_case)]
 pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Result<LocalBox<Sid>> {
-    if sub_auths.len() == 0 {
+    if sub_auths.is_empty() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
             "AllocateAndInitializeSid called with 0 sub_auths",
@@ -20,6 +20,7 @@ pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Resu
 
     let mut ptr = null_mut();
 
+    #[allow(clippy::len_zero)]
     let sa_0 = if sub_auths.len() > 0 { sub_auths[0] } else { 0 };
     let sa_1 = if sub_auths.len() > 1 { sub_auths[1] } else { 0 };
     let sa_2 = if sub_auths.len() > 2 { sub_auths[2] } else { 0 };

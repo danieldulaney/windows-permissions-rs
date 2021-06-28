@@ -52,7 +52,7 @@ pub fn buf_from_os<S: AsRef<OsStr> + ?Sized>(os: &S) -> Vec<u16> {
 /// buffer of `u16`s. Use this to find the location of the nul, then use
 /// `std::slice::from_raw_parts` to build a slice.
 ///
-/// ## Assumptions
+/// # Safety
 ///
 /// This function assumes that:
 /// - `haystack` points to an aligned buffer of `T`s
@@ -75,7 +75,7 @@ pub fn buf_from_os<S: AsRef<OsStr> + ?Sized>(os: &S) -> Vec<u16> {
 pub unsafe fn search_buffer<T: PartialEq>(needle: &T, haystack: *const T) -> usize {
     let mut position = 0usize;
 
-    while *haystack.offset(position as isize) != *needle {
+    while *haystack.add(position) != *needle {
         position += 1;
     }
 
@@ -163,7 +163,7 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
                 process_token,
                 winapi::um::winnt::TokenUser,
                 token_info.as_mut_ptr() as *mut _,
-                len.clone(),
+                len,
                 &mut len,
             )
         };
