@@ -40,7 +40,7 @@ use std::ptr::{null_mut, NonNull};
 ///
 /// For details, see [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc#parameters).
 ///
-/// ## Exotically-sized types
+/// # Exotically-sized types
 ///
 /// This struct has not been tested with exotically-sized types. Use with
 /// extreme caution.
@@ -51,7 +51,7 @@ pub struct LocalBox<T> {
 impl<T> LocalBox<T> {
     /// Get a `LocalBox` from a `NonNull`
     ///
-    /// ## Requirements
+    /// # Safety
     ///
     /// - The `NonNull` pointer *must* have been allocated with
     /// a Windows API call. When the resulting `NonNull<T>` is dropped, it
@@ -71,11 +71,11 @@ impl<T> LocalBox<T> {
     /// The memory will always come back zeroed, which has a modest performance
     /// penalty but can reduce the impact of buffer overruns.
     ///
-    /// ## Panics
+    /// # Panics
     ///
     /// Panics if the underlying `LocalAlloc` call fails.
     ///
-    /// ## Safety
+    /// # Safety
     ///
     /// The allocated memory is zeroed, which may not be a valid representation
     /// of a `T`.
@@ -88,7 +88,7 @@ impl<T> LocalBox<T> {
     ///
     /// If the allocation fails, returns the error code.
     ///
-    /// ## Safety
+    /// # Safety
     ///
     /// The contents of the memory are not guaranteed to be a valid `T`. The
     /// contents will either be zeroed or uninitialized depending on the `zeroed`
@@ -104,7 +104,7 @@ impl<T> LocalBox<T> {
         let ptr = winapi::um::winbase::LocalAlloc(flags.bits(), size);
 
         Ok(Self {
-            ptr: NonNull::new(ptr as *mut _).ok_or_else(|| io::Error::last_os_error())?,
+            ptr: NonNull::new(ptr as *mut _).ok_or_else(io::Error::last_os_error)?,
         })
     }
 
@@ -157,7 +157,7 @@ impl<T: fmt::Debug> fmt::Debug for LocalBox<T> {
 
 impl<T> Hash for LocalBox<T>
 where
-    T: Hash
+    T: Hash,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.deref().hash(state)

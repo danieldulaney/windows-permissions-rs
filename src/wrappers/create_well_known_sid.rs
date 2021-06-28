@@ -43,8 +43,8 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result
 
     if result != 0 {
         // Success! The SID was initialized and should be returned
-        return Ok(new_sid);
+        Ok(new_sid)
     } else {
-        return Err(io::Error::last_os_error());
+        Err(io::Error::last_os_error())
     }
 }

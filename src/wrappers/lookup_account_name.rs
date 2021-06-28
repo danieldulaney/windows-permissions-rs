@@ -101,7 +101,7 @@ pub fn LookupAccountName(
             let sid = unsafe { Box::from_raw(Box::into_raw(sid_box) as *mut Sid) };
 
             // Convert the referenced domain name into an OsString
-            let ref_dom_name = os_from_buf(&mut ref_dom_name_buf);
+            let ref_dom_name = os_from_buf(&ref_dom_name_buf);
 
             // Figure out SidNameUse
             let sid_name_use = SidNameUse::from_raw(sid_name_use).unwrap_or_else(|| {

@@ -183,16 +183,16 @@ bitflags! {
 
         // Object-specific access rights
         const SpecificRightsAll = SPECIFIC_RIGHTS_ALL;
-        const Bit0  = 1 << 00;
-        const Bit1  = 1 << 01;
-        const Bit2  = 1 << 02;
-        const Bit3  = 1 << 03;
-        const Bit4  = 1 << 04;
-        const Bit5  = 1 << 05;
-        const Bit6  = 1 << 06;
-        const Bit7  = 1 << 07;
-        const Bit8  = 1 << 08;
-        const Bit9  = 1 << 09;
+        const Bit0  = 1 <<  0;
+        const Bit1  = 1 <<  1;
+        const Bit2  = 1 <<  2;
+        const Bit3  = 1 <<  3;
+        const Bit4  = 1 <<  4;
+        const Bit5  = 1 <<  5;
+        const Bit6  = 1 <<  6;
+        const Bit7  = 1 <<  7;
+        const Bit8  = 1 <<  8;
+        const Bit9  = 1 <<  9;
         const Bit10 = 1 << 10;
         const Bit11 = 1 << 11;
         const Bit12 = 1 << 12;

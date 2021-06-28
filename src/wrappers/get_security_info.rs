@@ -7,7 +7,7 @@ use winapi::shared::winerror::ERROR_SUCCESS;
 
 /// Wraps [`GetSecurityInfo`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo)
 ///
-/// ## Panics
+/// # Panics
 ///
 /// Panics if the underlying call reports success but yields a null pointer.
 #[allow(non_snake_case)]
