@@ -2,6 +2,14 @@
 
 Safe Rust bindings to Windows permissions APIs.
 
+[![Crates.io][crates-badge]][crates-url]
+[![Docs.rs][docs-badge]][docs-url]
+
+[crates-badge]: https://img.shields.io/crates/v/windows-permissions
+[crates-url]: https://crates.io/crates/windows-permissions
+[docs-badge]: https://docs.rs/windows-permissions/badge.svg
+[docs-url]: https://docs.rs/windows-permissions
+
 ## Overview
 
 This crate provides safe Rust wrappers over several Windows permissions concepts,
