@@ -3,8 +3,8 @@ use std::io;
 
 /// Wraps [`AddAce`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-addace)
 ///
-/// This always uses the ACL_REVISION_DS revision, which should be compatible
-/// with all modern ACLs.
+/// This always uses the `ACL_REVISION_DS` revision, which should be
+/// compatible with all modern ACLs.
 #[allow(non_snake_case)]
 pub fn AddAce(acl: &mut Acl, index: u32, ace: &Ace) -> io::Result<()> {
     let result = unsafe {
