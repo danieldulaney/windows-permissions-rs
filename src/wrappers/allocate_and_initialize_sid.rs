@@ -2,13 +2,42 @@ use crate::{LocalBox, Sid};
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps [`AllocateAndInitializeSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-allocateandinitializesid)
+/// Wraps [`AllocateAndInitializeSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-allocateandinitializesid).
 ///
-/// Only the first 8 sub-authorities are considered. If sub_auths is 0, returns
+/// ```
+/// use windows_permissions::wrappers::AllocateAndInitializeSid;
+///
+/// let sid = AllocateAndInitializeSid([1, 2, 3, 4, 5, 6], &[1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
+///
+/// assert_eq!(sid.id_authority(), &[1, 2, 3, 4, 5, 6]);
+/// assert_eq!(sid.sub_authority_count(), 8);
+/// assert_eq!(sid.sub_authorities(), &[1, 2, 3, 4, 5, 6, 7, 8]);
+/// ```
+///
+/// This is wrapped by [`Sid::new`], which has identical behavior.
+///
+/// ```
+/// use windows_permissions::{Sid, wrappers::AllocateAndInitializeSid};
+///
+/// let sid = AllocateAndInitializeSid([1, 2, 3, 4, 5, 6], &[1, 2]).unwrap();
+/// let sid2 = Sid::new([1, 2, 3, 4, 5, 6], &[1, 2]).unwrap();
+///
+/// assert_eq!(sid, sid2);
+/// ```
+///
+/// Only the first 8 sub-authorities are considered. If sub_auths is empty, returns
 /// an error with `io::ErrorKind` of `InvalidData`. This is a workaround for
 /// the WinAPI behavior, which is to silently return an invalid SID with no
-/// sub-authorities. *Some* functions will parse it correctly, but lots (such
-/// as `ConvertStringSidToSid` will error.
+/// sub-authorities. *Some* functions will handle it correctly, but lots (such
+/// as `ConvertStringSidToSid`) will error.
+///
+/// ```
+/// use windows_permissions::wrappers::AllocateAndInitializeSid;
+/// use std::io::ErrorKind;
+///
+/// let error = AllocateAndInitializeSid([1, 2, 3, 4, 5, 6], &[]);
+/// assert_eq!(error.unwrap_err().kind(), ErrorKind::InvalidInput);
+/// ```
 #[allow(non_snake_case)]
 pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Result<LocalBox<Sid>> {
     if sub_auths.is_empty() {
