@@ -1,4 +1,12 @@
-/// Wraps [`GetSidLengthRequired`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsidlengthrequired)
+/// Wraps [`GetSidLengthRequired`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsidlengthrequired).
+///
+/// ```
+/// use windows_permissions::wrappers::GetSidLengthRequired;
+///
+/// assert_eq!(GetSidLengthRequired(1), 12);
+/// assert_eq!(GetSidLengthRequired(2), 16);
+/// assert_eq!(GetSidLengthRequired(3), 20);
+/// ```
 #[allow(non_snake_case)]
 pub fn GetSidLengthRequired(sub_auth_count: u8) -> usize {
     // Assumptions:
