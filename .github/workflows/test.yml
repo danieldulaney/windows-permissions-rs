@@ -1,8 +1,14 @@
 name: Rust
 
-'on': [push]
+on:
+  push:
+    branches: [master]
+  pull_request: null
 
 jobs:
+
+  # On Windows, make sure that we work across all Rust versions
+  # On Linux, just make sure nothing goes catastrophically wrong
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -27,9 +33,8 @@ jobs:
         with:
           command: test
 
-  # Be strict with lints: rustfmt and a full-strength clippy
-  # Runs only on Windows with latest version
-  lint:
+  # Check rustfmt status
+  fmt:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,11 +43,23 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: 'rustfmt, clippy'
+          components: 'rustfmt'
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: '--all -- --check'
+
+  # Lint with a full-strength clippy
+  clippy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: 'clippy'
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
