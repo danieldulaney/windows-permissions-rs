@@ -9,6 +9,24 @@ use std::slice;
 /// Wraps [`ConvertSecurityDescriptorToStringSecurityDescriptorW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertsecuritydescriptortostringsecuritydescriptorw)
 ///
 /// This always uses `SDDL_REVISION_1` as the SDDL revision.
+///
+/// It may be more convenient to use [`SecurityDescriptor::as_sddl`] when all
+/// security information is needed.
+///
+/// ```
+/// use windows_permissions::wrappers::ConvertSecurityDescriptorToStringSecurityDescriptor;
+/// use windows_permissions::{constants::SecurityInformation, LocalBox, SecurityDescriptor};
+///
+/// let string_sd = "G:S-1-5-10-20";
+/// let sd: LocalBox<SecurityDescriptor> = string_sd.parse().unwrap();
+///
+/// let string_sd2 = ConvertSecurityDescriptorToStringSecurityDescriptor(
+///     &sd,
+///     SecurityInformation::all()
+/// ).unwrap();
+///
+/// assert_eq!(string_sd, &string_sd2);
+/// ```
 #[allow(non_snake_case)]
 pub fn ConvertSecurityDescriptorToStringSecurityDescriptor(
     sd: &SecurityDescriptor,
