@@ -4,7 +4,15 @@ use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps [`ConvertStringSidToSidW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertstringsidtosidw)
+/// Wraps [`ConvertStringSidToSidW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertstringsidtosidw).
+///
+/// ```
+/// use windows_permissions::{Sid, wrappers::ConvertStringSidToSid};
+///
+/// let string_sid = "S-1-5-123-456-789";
+/// let sid = ConvertStringSidToSid(string_sid).unwrap();
+/// assert_eq!(string_sid, &sid.to_string());
+/// ```
 ///
 /// # Panics
 ///
