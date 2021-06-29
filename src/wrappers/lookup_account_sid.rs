@@ -6,9 +6,20 @@ use std::ptr::null;
 
 const BUFFER_SIZE: u32 = 256;
 
-/// Wraps [`LookupAccountSidW`](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountsidw)
+/// Wraps [`LookupAccountSidW`](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountsidw).
 ///
 /// Returns (name, domain).
+///
+/// ```
+/// use windows_permissions::{Sid, LocalBox, wrappers::LookupAccountSid};
+/// use winapi::um::winnt::WinBuiltinAdministratorsSid;
+///
+/// let sid = Sid::well_known_sid(WinBuiltinAdministratorsSid).unwrap();
+/// let (name, domain) = LookupAccountSid(&sid).unwrap();
+///
+/// assert_eq!(name, "Administrators");
+/// assert_eq!(domain, "BUILTIN");
+/// ```
 #[allow(non_snake_case)]
 pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), io::Error> {
     let mut name_size = BUFFER_SIZE;
