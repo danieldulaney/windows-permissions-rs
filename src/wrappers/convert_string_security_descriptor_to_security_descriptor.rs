@@ -3,9 +3,21 @@ use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
 
-/// Wraps [`ConvertStringSecurityDescriptorToSecurityDescriptorW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertstringsecuritydescriptortosecuritydescriptorw)
+/// Wraps [`ConvertStringSecurityDescriptorToSecurityDescriptorW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertstringsecuritydescriptortosecuritydescriptorw).
 ///
-/// Always uses `SDDL_REVISION_1`
+/// Always uses `SDDL_REVISION_1`.
+///
+/// It may be more convenient to use [`str::parse`] or one of the other wrappers
+/// enabled because [`FromStr`](std::str::FromStr) is implemented on
+/// [`LocalBox<SecurityDescriptor>`].
+///
+/// ```
+/// use windows_permissions::wrappers::ConvertStringSecurityDescriptorToSecurityDescriptor;
+///
+/// let string_sd = "G:S-1-5-10-20";
+/// let sd = ConvertStringSecurityDescriptorToSecurityDescriptor(string_sd).unwrap();
+/// assert_eq!(string_sd, &sd.as_sddl().unwrap());
+/// ```
 #[allow(non_snake_case)]
 pub fn ConvertStringSecurityDescriptorToSecurityDescriptor<S: AsRef<OsStr> + ?Sized>(
     string: &S,
