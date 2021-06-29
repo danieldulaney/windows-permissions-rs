@@ -4,7 +4,17 @@ use std::ffi::OsString;
 use std::io;
 use std::ptr::null_mut;
 
-/// Wraps [`ConvertSidtoStringSidW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertsidtostringsidw)
+/// Wraps [`ConvertSidToStringSidW`](https://docs.microsoft.com/en-us/windows/win32/api/sddl/nf-sddl-convertsidtostringsidw).
+///
+/// ```
+/// use windows_permissions::{LocalBox, Sid, wrappers::ConvertSidToStringSid};
+///
+/// let string_sid = "S-1-5-123-456-789";
+/// let sid: LocalBox<Sid> = string_sid.parse().unwrap();
+/// let string_sid2 = ConvertSidToStringSid(&sid).unwrap();
+///
+/// assert_eq!(string_sid, string_sid2);
+/// ```
 #[allow(non_snake_case)]
 pub fn ConvertSidToStringSid(sid: &Sid) -> io::Result<OsString> {
     let mut buf_ptr: *mut u16 = null_mut();
