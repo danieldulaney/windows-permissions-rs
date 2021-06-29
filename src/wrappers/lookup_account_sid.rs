@@ -2,7 +2,7 @@ use crate::utilities::os_from_buf;
 use crate::Sid;
 use std::ffi::OsString;
 use std::io;
-use std::ptr::{null, null_mut};
+use std::ptr::null;
 
 const BUFFER_SIZE: u32 = 256;
 
@@ -21,6 +21,8 @@ pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), io::Error> {
         let mut name: Vec<u16> = vec![0; name_size as usize];
         let mut dom: Vec<u16> = vec![0; dom_size as usize];
 
+        let mut name_use: u32 = 0;
+
         let result = unsafe {
             winapi::um::winbase::LookupAccountSidW(
                 null(),
@@ -29,7 +31,7 @@ pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), io::Error> {
                 &mut name_size,
                 dom.as_mut_ptr(),
                 &mut dom_size,
-                null_mut(),
+                &mut name_use,
             )
         };
 
