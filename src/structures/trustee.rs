@@ -73,7 +73,7 @@ impl<'s> Trustee<'s> {
     ///
     /// Also panics if the pointer value is null.
     pub fn get_subject(&self) -> TrusteeSubject<'s> {
-        let form = wrappers::GetTrusteeForm(&self)
+        let form = wrappers::GetTrusteeForm(self)
             .unwrap_or_else(|f| panic!("Trustee had unrecognized form: {:x}", f));
 
         let ptr = self.inner.ptstrName as *mut _;

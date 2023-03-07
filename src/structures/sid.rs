@@ -192,7 +192,7 @@ impl fmt::Display for Sid {
         write!(
             fmt,
             "{}",
-            wrappers::ConvertSidToStringSid(&self)
+            wrappers::ConvertSidToStringSid(self)
                 .expect("Passed a safe Sid to ConvertSidToStringSid but got an error")
                 .to_string_lossy()
         )

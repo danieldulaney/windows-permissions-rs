@@ -127,7 +127,7 @@ impl<T> Drop for LocalBox<T> {
 
 impl<T> AsRef<T> for LocalBox<T> {
     fn as_ref(&self) -> &T {
-        &*self
+        self
     }
 }
 

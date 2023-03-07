@@ -28,7 +28,7 @@ pub fn ConvertStringSecurityDescriptorToSecurityDescriptor<S: AsRef<OsStr> + ?Si
     let result = unsafe {
         windows_sys::Win32::Security::Authorization::ConvertStringSecurityDescriptorToSecurityDescriptorW(
             buffer.as_ptr(),
-            windows_sys::Win32::Security::Authorization::SDDL_REVISION_1.into(),
+            windows_sys::Win32::Security::Authorization::SDDL_REVISION_1,
             &mut sd_ptr,
             null_mut(),
         )

@@ -39,7 +39,7 @@ pub fn ConvertSecurityDescriptorToStringSecurityDescriptor(
     let result = unsafe {
         windows_sys::Win32::Security::Authorization::ConvertSecurityDescriptorToStringSecurityDescriptorW(
             sd as *const _ as *mut _,
-            windows_sys::Win32::Security::Authorization::SDDL_REVISION_1.into(),
+            windows_sys::Win32::Security::Authorization::SDDL_REVISION_1,
             info.bits(),
             &mut buf_ptr,
             &mut buf_len,

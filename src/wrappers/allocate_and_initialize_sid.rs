@@ -61,7 +61,7 @@ pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Resu
 
     let result = unsafe {
         windows_sys::Win32::Security::AllocateAndInitializeSid(
-            &mut windows_sys::Win32::Security::SID_IDENTIFIER_AUTHORITY { Value: id_auth },
+            &windows_sys::Win32::Security::SID_IDENTIFIER_AUTHORITY { Value: id_auth },
             sub_auths.len() as u8,
             sa_0,
             sa_1,

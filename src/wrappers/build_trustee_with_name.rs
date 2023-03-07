@@ -24,5 +24,5 @@ pub fn BuildTrusteeWithNameOsStr(name: &OsStr) -> Trustee<'static> {
     // Convert name into a static WTF-16 buffer
     let buffer: &'static [u16] = Box::leak(utilities::buf_from_os(name).into_boxed_slice());
 
-    BuildTrusteeWithName(&buffer)
+    BuildTrusteeWithName(buffer)
 }
