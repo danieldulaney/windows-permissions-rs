@@ -12,7 +12,7 @@ const BUFFER_SIZE: u32 = 256;
 ///
 /// ```
 /// use windows_permissions::{Sid, LocalBox, wrappers::LookupAccountSid};
-/// use winapi::um::winnt::WinBuiltinAdministratorsSid;
+/// use windows_sys::Win32::Security::WinBuiltinAdministratorsSid;
 ///
 /// let sid = Sid::well_known_sid(WinBuiltinAdministratorsSid).unwrap();
 /// let (name, domain) = LookupAccountSid(&sid).unwrap();
@@ -32,10 +32,10 @@ pub fn LookupAccountSid(sid: &Sid) -> Result<(OsString, OsString), io::Error> {
         let mut name: Vec<u16> = vec![0; name_size as usize];
         let mut dom: Vec<u16> = vec![0; dom_size as usize];
 
-        let mut name_use: u32 = 0;
+        let mut name_use = 0;
 
         let result = unsafe {
-            winapi::um::winbase::LookupAccountSidW(
+            windows_sys::Win32::Security::LookupAccountSidW(
                 null(),
                 sid as *const Sid as *mut _,
                 name.as_mut_ptr(),

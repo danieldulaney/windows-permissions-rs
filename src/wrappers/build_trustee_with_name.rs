@@ -9,7 +9,7 @@ pub fn BuildTrusteeWithName<'s>(name_buf: &'s [u16]) -> Trustee<'s> {
     let mut trustee = unsafe { Trustee::allocate() };
 
     unsafe {
-        winapi::um::aclapi::BuildTrusteeWithNameW(
+        windows_sys::Win32::Security::Authorization::BuildTrusteeWithNameW(
             trustee.as_mut_ptr(),
             name_buf.as_ptr() as *mut _,
         );

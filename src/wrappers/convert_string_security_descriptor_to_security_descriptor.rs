@@ -26,9 +26,9 @@ pub fn ConvertStringSecurityDescriptorToSecurityDescriptor<S: AsRef<OsStr> + ?Si
     let mut sd_ptr = null_mut();
 
     let result = unsafe {
-        winapi::shared::sddl::ConvertStringSecurityDescriptorToSecurityDescriptorW(
+        windows_sys::Win32::Security::Authorization::ConvertStringSecurityDescriptorToSecurityDescriptorW(
             buffer.as_ptr(),
-            winapi::shared::sddl::SDDL_REVISION_1.into(),
+            windows_sys::Win32::Security::Authorization::SDDL_REVISION_1.into(),
             &mut sd_ptr,
             null_mut(),
         )

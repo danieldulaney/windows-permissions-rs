@@ -8,7 +8,7 @@ use std::io;
 ///
 /// ```
 /// use windows_permissions::{wrappers::CopySid, Sid};
-/// use winapi::um::winnt::WinBuiltinAdministratorsSid;
+/// use windows_sys::Win32::Security::WinBuiltinAdministratorsSid;
 ///
 /// let original = Sid::well_known_sid(WinBuiltinAdministratorsSid).unwrap();
 ///
@@ -27,7 +27,7 @@ pub fn CopySid(sid: &Sid) -> io::Result<LocalBox<Sid>> {
     let new_sid: LocalBox<Sid> = unsafe { LocalBox::try_allocate(true, size)? };
 
     let success = unsafe {
-        winapi::um::securitybaseapi::CopySid(
+        windows_sys::Win32::Security::CopySid(
             size as u32,
             new_sid.as_ptr() as *mut _,
             sid as *const _ as *mut _,

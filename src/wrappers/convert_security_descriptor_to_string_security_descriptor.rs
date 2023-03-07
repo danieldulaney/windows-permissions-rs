@@ -37,9 +37,9 @@ pub fn ConvertSecurityDescriptorToStringSecurityDescriptor(
 
     // If success, buf_ptr must be LocalFree'd
     let result = unsafe {
-        winapi::shared::sddl::ConvertSecurityDescriptorToStringSecurityDescriptorW(
+        windows_sys::Win32::Security::Authorization::ConvertSecurityDescriptorToStringSecurityDescriptorW(
             sd as *const _ as *mut _,
-            winapi::shared::sddl::SDDL_REVISION_1.into(),
+            windows_sys::Win32::Security::Authorization::SDDL_REVISION_1.into(),
             info.bits(),
             &mut buf_ptr,
             &mut buf_len,
@@ -55,7 +55,7 @@ pub fn ConvertSecurityDescriptorToStringSecurityDescriptor(
 
     let string = utilities::os_from_buf(slice);
 
-    unsafe { winapi::um::winbase::LocalFree(buf_ptr as *mut _) };
+    unsafe { windows_sys::Win32::System::Memory::LocalFree(buf_ptr as *mut _ as isize) };
 
     Ok(string)
 }

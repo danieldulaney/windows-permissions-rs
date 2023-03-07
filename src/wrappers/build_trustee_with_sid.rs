@@ -8,7 +8,10 @@ pub fn BuildTrusteeWithSid<'s>(sid: &'s Sid) -> Trustee<'s> {
     let mut trustee = unsafe { Trustee::allocate() };
 
     unsafe {
-        winapi::um::aclapi::BuildTrusteeWithSidW(trustee.as_mut_ptr(), sid as *const _ as *mut _)
+        windows_sys::Win32::Security::Authorization::BuildTrusteeWithSidW(
+            trustee.as_mut_ptr(),
+            sid as *const _ as *mut _,
+        )
     }
 
     trustee

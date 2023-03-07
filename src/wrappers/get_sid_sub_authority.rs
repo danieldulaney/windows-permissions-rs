@@ -25,7 +25,7 @@ use crate::Sid;
 /// ```
 #[allow(non_snake_case)]
 pub unsafe fn GetSidSubAuthority(sid: &Sid, sub_auth: u8) -> *mut u32 {
-    winapi::um::securitybaseapi::GetSidSubAuthority(sid as *const _ as *mut _, sub_auth as u32)
+    windows_sys::Win32::Security::GetSidSubAuthority(sid as *const _ as *mut _, sub_auth as u32)
 }
 
 /// Wraps [`GetSidSubAuthority`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsidsubauthority)

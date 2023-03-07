@@ -1,13 +1,13 @@
+use windows_sys::Win32::Security::Authorization::TRUSTEE_W;
+
 use crate::constants::TrusteeForm;
 use crate::utilities;
 use crate::wrappers;
 use crate::Sid;
-use std::ffi::OsStr;
+use std::ffi::{c_void, OsStr};
 use std::fmt;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
-use winapi::ctypes::c_void;
-use winapi::um::accctrl::TRUSTEE_W;
 
 /// An entity that can be added to an ACL.
 ///

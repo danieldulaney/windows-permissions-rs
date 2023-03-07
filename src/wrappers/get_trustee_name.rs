@@ -6,7 +6,7 @@ use std::ffi::OsString;
 #[allow(non_snake_case)]
 pub fn GetTrusteeName(trustee: &Trustee) -> OsString {
     unsafe {
-        let ptr = winapi::um::aclapi::GetTrusteeNameW(trustee.as_ptr() as *mut _);
+        let ptr = windows_sys::Win32::Security::Authorization::GetTrusteeNameW(trustee.as_ptr());
         let len = search_buffer(&0, ptr);
         let buf = std::slice::from_raw_parts(ptr, len);
 

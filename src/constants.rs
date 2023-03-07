@@ -3,9 +3,16 @@
 #![allow(non_upper_case_globals)]
 #![allow(missing_docs)]
 
-use winapi::um::accctrl::*;
-use winapi::um::minwinbase::*;
-use winapi::um::winnt::*;
+use windows_sys::Win32::Foundation::GENERIC_ALL;
+use windows_sys::Win32::Foundation::GENERIC_EXECUTE;
+use windows_sys::Win32::Foundation::GENERIC_READ;
+use windows_sys::Win32::Foundation::GENERIC_WRITE;
+use windows_sys::Win32::Security::Authorization::*;
+use windows_sys::Win32::Security::*;
+use windows_sys::Win32::Storage::FileSystem::*;
+use windows_sys::Win32::System::Memory::*;
+use windows_sys::Win32::System::Registry::*;
+use windows_sys::Win32::System::SystemServices::*;
 
 /// Create an enum from a list of constants. Generated enums get a method
 /// `from_raw` that allows them to be converted from a value.
@@ -39,7 +46,7 @@ macro_rules! constant_enum {
     }
 }
 
-constant_enum!(TrusteeForm; u32;
+constant_enum!(TrusteeForm; i32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-trustee_form";
     TRUSTEE_IS_SID,
     TRUSTEE_IS_NAME,
@@ -47,7 +54,7 @@ constant_enum!(TrusteeForm; u32;
     TRUSTEE_IS_OBJECTS_AND_SID,
     TRUSTEE_IS_OBJECTS_AND_NAME);
 
-constant_enum!(TrusteeType; u32;
+constant_enum!(TrusteeType; i32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-trustee_type";
     TRUSTEE_IS_UNKNOWN,
     TRUSTEE_IS_USER,
@@ -59,12 +66,12 @@ constant_enum!(TrusteeType; u32;
     TRUSTEE_IS_INVALID,
     TRUSTEE_IS_COMPUTER);
 
-constant_enum!(MultipleTrusteeOperation; u32;
+constant_enum!(MultipleTrusteeOperation; i32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-multiple_trustee_operation";
     NO_MULTIPLE_TRUSTEE,
     TRUSTEE_IS_IMPERSONATE);
 
-constant_enum!(SeObjectType; u32;
+constant_enum!(SeObjectType; i32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-se_object_type";
     SE_UNKNOWN_OBJECT_TYPE,
     SE_FILE_OBJECT,
@@ -81,7 +88,7 @@ constant_enum!(SeObjectType; u32;
     SE_REGISTRY_WOW64_32KEY,
     SE_REGISTRY_WOW64_64KEY);
 
-constant_enum!(AceType; u8;
+constant_enum!(AceType; u32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header#members";
     ACCESS_ALLOWED_ACE_TYPE,
     ACCESS_ALLOWED_CALLBACK_ACE_TYPE,
@@ -99,12 +106,12 @@ constant_enum!(AceType; u8;
     SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE,
     SYSTEM_SCOPED_POLICY_ID_ACE_TYPE);
 
-constant_enum!(AclRevision; u8;
+constant_enum!(AclRevision; u32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-acl";
     ACL_REVISION,
     ACL_REVISION_DS);
 
-constant_enum!(SidNameUse; u32;
+constant_enum!(SidNameUse; i32;
     msdn: "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-sid_name_use";
     SidTypeUser,
     SidTypeGroup,
@@ -121,13 +128,13 @@ constant_enum!(SidNameUse; u32;
 bitflags! {
     /// See the `AceFlags` available at [MSDN](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header).
     pub struct AceFlags: u8 {
-        const ContainerInherit = CONTAINER_INHERIT_ACE;
-        const ObjectInherit = OBJECT_INHERIT_ACE;
-        const NoPropagateInherit = NO_PROPAGATE_INHERIT_ACE;
-        const InheritOnly = INHERIT_ONLY_ACE;
-        const Inherited = INHERITED_ACE;
-        const SuccessfulAccess = SUCCESSFUL_ACCESS_ACE_FLAG;
-        const FailedAccess = FAILED_ACCESS_ACE_FLAG;
+        const ContainerInherit = CONTAINER_INHERIT_ACE as u8;
+        const ObjectInherit = OBJECT_INHERIT_ACE as u8;
+        const NoPropagateInherit = NO_PROPAGATE_INHERIT_ACE as u8;
+        const InheritOnly = INHERIT_ONLY_ACE as u8;
+        const Inherited = INHERITED_ACE as u8;
+        const SuccessfulAccess = SUCCESSFUL_ACCESS_ACE_FLAG as u8;
+        const FailedAccess = FAILED_ACCESS_ACE_FLAG as u8;
     }
 }
 

@@ -1,11 +1,13 @@
 //! Minor utilities for working with Windows APIs.
 
+use windows_sys::Win32::Foundation::HANDLE;
+use windows_sys::Win32::Security::TOKEN_USER;
+
 use crate::{wrappers, LocalBox, Sid};
 use std::ffi::{OsStr, OsString};
 use std::io;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::ptr::{null, null_mut};
-use winapi::um::winnt::{HANDLE, TOKEN_USER};
+use std::ptr::null;
 
 /// Create an `OsString` from a NUL-terminated buffer
 ///
@@ -133,14 +135,14 @@ pub fn ptr_from_opt<T>(opt: Option<&T>) -> *const T {
 
 /// Get the user SID of the current process
 pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
-    let mut process_token: HANDLE = null_mut();
+    let mut process_token: HANDLE = 0;
 
     // process_token must not be used until return value is checked
     // process_token must be closed if return value is nonzero
     let result = unsafe {
-        winapi::um::processthreadsapi::OpenProcessToken(
-            winapi::um::processthreadsapi::GetCurrentProcess(),
-            winapi::um::winnt::TOKEN_QUERY,
+        windows_sys::Win32::System::Threading::OpenProcessToken(
+            windows_sys::Win32::System::Threading::GetCurrentProcess(),
+            windows_sys::Win32::Security::TOKEN_QUERY,
             &mut process_token,
         )
     };
@@ -159,9 +161,9 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
         token_info = vec![0u8; len as usize];
 
         let result = unsafe {
-            winapi::um::securitybaseapi::GetTokenInformation(
+            windows_sys::Win32::Security::GetTokenInformation(
                 process_token,
-                winapi::um::winnt::TokenUser,
+                windows_sys::Win32::Security::TokenUser,
                 token_info.as_mut_ptr() as *mut _,
                 len,
                 &mut len,
@@ -179,12 +181,12 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
             // If we got error code 122, try again
             // len was updated to the new size by the API call
             if error_code.raw_os_error()
-                == Some(winapi::shared::winerror::ERROR_INSUFFICIENT_BUFFER as i32)
+                == Some(windows_sys::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER as i32)
             {
                 continue;
             }
 
-            unsafe { winapi::um::handleapi::CloseHandle(process_token) };
+            unsafe { windows_sys::Win32::Foundation::CloseHandle(process_token) };
 
             return Err(error_code);
         }
@@ -204,7 +206,7 @@ pub fn current_process_sid() -> io::Result<LocalBox<Sid>> {
     let sid_copy = wrappers::CopySid(sid_ref);
 
     unsafe {
-        winapi::um::handleapi::CloseHandle(process_token);
+        windows_sys::Win32::Foundation::CloseHandle(process_token);
     }
 
     sid_copy

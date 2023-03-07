@@ -1,9 +1,10 @@
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+
 use crate::constants::{SeObjectType, SecurityInformation};
 use crate::{LocalBox, SecurityDescriptor};
 use std::io;
 use std::os::windows::io::AsRawHandle;
 use std::ptr::{null_mut, NonNull};
-use winapi::shared::winerror::ERROR_SUCCESS;
 
 /// Wraps [`GetSecurityInfo`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo)
 ///
@@ -19,9 +20,9 @@ pub fn GetSecurityInfo<H: AsRawHandle>(
     let mut sd = null_mut();
 
     let result_code = unsafe {
-        winapi::um::aclapi::GetSecurityInfo(
-            handle.as_raw_handle() as *mut _,
-            obj_type as u32,
+        windows_sys::Win32::Security::Authorization::GetSecurityInfo(
+            handle.as_raw_handle() as isize,
+            obj_type as _,
             sec_info.bits(),
             null_mut(),
             null_mut(),

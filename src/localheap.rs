@@ -1,5 +1,7 @@
 //! A specialized [`Box`] variation for items stored on the local heap.
 
+use windows_sys::Win32::System::Memory::{LocalAlloc, LocalFree};
+
 use crate::constants::LocalAllocFlags;
 use std::borrow::{Borrow, BorrowMut};
 use std::cmp::PartialEq;
@@ -7,7 +9,7 @@ use std::fmt;
 use std::hash::Hash;
 use std::io;
 use std::ops::{Deref, DerefMut};
-use std::ptr::{null_mut, NonNull};
+use std::ptr::NonNull;
 
 /// A smart pointer to an object on the local heap.
 ///
@@ -101,7 +103,7 @@ impl<T> LocalBox<T> {
             false => LocalAllocFlags::Fixed,
         };
 
-        let ptr = winapi::um::winbase::LocalAlloc(flags.bits(), size);
+        let ptr = LocalAlloc(flags.bits(), size);
 
         Ok(Self {
             ptr: NonNull::new(ptr as *mut _).ok_or_else(io::Error::last_os_error)?,
@@ -118,8 +120,8 @@ impl<T> LocalBox<T> {
 
 impl<T> Drop for LocalBox<T> {
     fn drop(&mut self) {
-        let result = unsafe { winapi::um::winbase::LocalFree(self.as_ptr() as *mut _) };
-        debug_assert_eq!(result, null_mut());
+        let result = unsafe { LocalFree(self.as_ptr() as *mut _ as isize) };
+        debug_assert_eq!(result, 0);
     }
 }
 

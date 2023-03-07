@@ -1,9 +1,10 @@
+use windows_sys::Win32::Security::{self, ACE_HEADER};
+
 use crate::constants::{AccessRights, AceFlags, AceType};
 use crate::Sid;
 use std::fmt;
 use std::mem;
 use std::ptr::NonNull;
-use winapi::um::winnt::ACE_HEADER;
 
 /// An access control list.
 ///
@@ -35,7 +36,7 @@ impl Ace {
 
     /// Determine the type of ACE
     pub fn ace_type(&self) -> AceType {
-        AceType::from_raw(self.header.AceType).expect("ACE had invalid header byte")
+        AceType::from_raw(self.header.AceType as u32).expect("ACE had invalid header byte")
     }
 
     /// Get the option flags set on the ACE
@@ -46,8 +47,6 @@ impl Ace {
 
     /// Get the access mask if it is available for this ACE type
     pub fn mask(&self) -> AccessRights {
-        use winapi::um::winnt::*;
-
         macro_rules! mask_mapping {
             ($slf:ident ; $($t:ident => $b:ty),*) => {{
                 match $slf.ace_type() {
@@ -62,28 +61,30 @@ impl Ace {
 
         unsafe {
             mask_mapping! {self;
-                ACCESS_ALLOWED_ACE_TYPE => ACCESS_ALLOWED_ACE,
-                ACCESS_ALLOWED_CALLBACK_ACE_TYPE => ACCESS_ALLOWED_CALLBACK_ACE,
-                ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE => ACCESS_ALLOWED_CALLBACK_OBJECT_ACE,
-                ACCESS_ALLOWED_OBJECT_ACE_TYPE => ACCESS_ALLOWED_OBJECT_ACE,
-                ACCESS_DENIED_ACE_TYPE => ACCESS_DENIED_ACE,
-                ACCESS_DENIED_CALLBACK_ACE_TYPE => ACCESS_DENIED_ACE,
-                ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE => ACCESS_DENIED_CALLBACK_OBJECT_ACE,
-                ACCESS_DENIED_OBJECT_ACE_TYPE => ACCESS_DENIED_OBJECT_ACE,
-                SYSTEM_AUDIT_ACE_TYPE => SYSTEM_AUDIT_ACE,
-                SYSTEM_AUDIT_CALLBACK_ACE_TYPE => SYSTEM_AUDIT_CALLBACK_ACE,
-                SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE => SYSTEM_AUDIT_CALLBACK_ACE,
-                SYSTEM_AUDIT_OBJECT_ACE_TYPE => SYSTEM_AUDIT_OBJECT_ACE,
-                SYSTEM_MANDATORY_LABEL_ACE_TYPE => SYSTEM_MANDATORY_LABEL_ACE,
-                SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE => SYSTEM_RESOURCE_ATTRIBUTE_ACE,
-                SYSTEM_SCOPED_POLICY_ID_ACE_TYPE => SYSTEM_SCOPED_POLICY_ID_ACE
+                ACCESS_ALLOWED_ACE_TYPE => Security::ACCESS_ALLOWED_ACE,
+                ACCESS_ALLOWED_CALLBACK_ACE_TYPE => Security::ACCESS_ALLOWED_CALLBACK_ACE,
+                ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE => Security::ACCESS_ALLOWED_CALLBACK_OBJECT_ACE,
+                ACCESS_ALLOWED_OBJECT_ACE_TYPE => Security::ACCESS_ALLOWED_OBJECT_ACE,
+                ACCESS_DENIED_ACE_TYPE => Security::ACCESS_DENIED_ACE,
+                ACCESS_DENIED_CALLBACK_ACE_TYPE => Security::ACCESS_DENIED_ACE,
+                ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE => Security::ACCESS_DENIED_CALLBACK_OBJECT_ACE,
+                ACCESS_DENIED_OBJECT_ACE_TYPE => Security::ACCESS_DENIED_OBJECT_ACE,
+                SYSTEM_AUDIT_ACE_TYPE => Security::SYSTEM_AUDIT_ACE,
+                SYSTEM_AUDIT_CALLBACK_ACE_TYPE => Security::SYSTEM_AUDIT_CALLBACK_ACE,
+                SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE => Security::SYSTEM_AUDIT_CALLBACK_ACE,
+                SYSTEM_AUDIT_OBJECT_ACE_TYPE => Security::SYSTEM_AUDIT_OBJECT_ACE,
+                SYSTEM_MANDATORY_LABEL_ACE_TYPE => Security::SYSTEM_MANDATORY_LABEL_ACE,
+                SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE => Security::SYSTEM_RESOURCE_ATTRIBUTE_ACE,
+                SYSTEM_SCOPED_POLICY_ID_ACE_TYPE => Security::SYSTEM_SCOPED_POLICY_ID_ACE
             }
         }
     }
 
     /// Get the SID if it is available for this ACE type
     pub fn sid(&self) -> Option<&Sid> {
-        use winapi::um::winnt::*;
+        use windows_sys::Win32::Security::{
+            ACE_INHERITED_OBJECT_TYPE_PRESENT, ACE_OBJECT_TYPE_PRESENT,
+        };
 
         macro_rules! get_sid {
             ($slf:ident ; $ace_type:ty ; $sid_field:ident ) => {
@@ -97,8 +98,8 @@ impl Ace {
             };
             ($slf:ident ; $ace_type:ty ; $field_none:ident , $field_one:ident, $field_both:ident) => {{
                 let flags = (*(&$slf.header as *const ACE_HEADER as *const $ace_type)).Flags;
-                let obj_pres = flags & winapi::um::winnt::ACE_OBJECT_TYPE_PRESENT != 0;
-                let inh_pres = flags & winapi::um::winnt::ACE_INHERITED_OBJECT_TYPE_PRESENT != 0;
+                let obj_pres = flags & ACE_OBJECT_TYPE_PRESENT != 0;
+                let inh_pres = flags & ACE_INHERITED_OBJECT_TYPE_PRESENT != 0;
                 match (obj_pres, inh_pres) {
                     (false, false) => get_sid!($slf ; $ace_type ; $field_none),
                     (true,  false) => get_sid!($slf ; $ace_type ; $field_one),
@@ -110,40 +111,46 @@ impl Ace {
 
         unsafe {
             match self.ace_type() {
-                AceType::ACCESS_ALLOWED_ACE_TYPE => get_sid!(self; ACCESS_ALLOWED_ACE),
+                AceType::ACCESS_ALLOWED_ACE_TYPE => get_sid!(self; Security::ACCESS_ALLOWED_ACE),
                 AceType::ACCESS_ALLOWED_CALLBACK_ACE_TYPE => {
-                    get_sid!(self; ACCESS_ALLOWED_CALLBACK_ACE)
+                    get_sid!(self; Security::ACCESS_ALLOWED_CALLBACK_ACE)
                 }
                 AceType::ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE => {
-                    get_sid!(self; ACCESS_ALLOWED_CALLBACK_OBJECT_ACE;
+                    get_sid!(self; Security::ACCESS_ALLOWED_CALLBACK_OBJECT_ACE;
                     ObjectType, InheritedObjectType, SidStart)
                 }
                 AceType::ACCESS_ALLOWED_OBJECT_ACE_TYPE => {
-                    get_sid!(self; ACCESS_ALLOWED_OBJECT_ACE;
+                    get_sid!(self; Security::ACCESS_ALLOWED_OBJECT_ACE;
                     ObjectType, InheritedObjectType, SidStart)
                 }
-                AceType::ACCESS_DENIED_ACE_TYPE => get_sid!(self; ACCESS_DENIED_ACE),
-                AceType::ACCESS_DENIED_CALLBACK_ACE_TYPE => get_sid!(self; ACCESS_DENIED_ACE),
+                AceType::ACCESS_DENIED_ACE_TYPE => get_sid!(self; Security::ACCESS_DENIED_ACE),
+                AceType::ACCESS_DENIED_CALLBACK_ACE_TYPE => {
+                    get_sid!(self; Security::ACCESS_DENIED_ACE)
+                }
                 AceType::ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE => {
-                    get_sid!(self; ACCESS_DENIED_CALLBACK_OBJECT_ACE;
+                    get_sid!(self; Security::ACCESS_DENIED_CALLBACK_OBJECT_ACE;
                     ObjectType, InheritedObjectType, SidStart)
                 }
-                AceType::ACCESS_DENIED_OBJECT_ACE_TYPE => get_sid!(self; ACCESS_DENIED_OBJECT_ACE;
-                    ObjectType, InheritedObjectType, SidStart),
-                AceType::SYSTEM_AUDIT_ACE_TYPE => get_sid!(self; SYSTEM_AUDIT_ACE),
+                AceType::ACCESS_DENIED_OBJECT_ACE_TYPE => {
+                    get_sid!(self; Security::ACCESS_DENIED_OBJECT_ACE;
+                    ObjectType, InheritedObjectType, SidStart)
+                }
+                AceType::SYSTEM_AUDIT_ACE_TYPE => get_sid!(self; Security::SYSTEM_AUDIT_ACE),
                 AceType::SYSTEM_AUDIT_CALLBACK_ACE_TYPE => {
-                    get_sid!(self; SYSTEM_AUDIT_CALLBACK_ACE)
+                    get_sid!(self; Security::SYSTEM_AUDIT_CALLBACK_ACE)
                 }
                 AceType::SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE => {
-                    get_sid!(self; SYSTEM_AUDIT_CALLBACK_ACE; SidStart)
+                    get_sid!(self; Security::SYSTEM_AUDIT_CALLBACK_ACE; SidStart)
                 }
-                AceType::SYSTEM_AUDIT_OBJECT_ACE_TYPE => get_sid!(self; SYSTEM_AUDIT_OBJECT_ACE;
-                    ObjectType, InheritedObjectType, SidStart),
+                AceType::SYSTEM_AUDIT_OBJECT_ACE_TYPE => {
+                    get_sid!(self; Security::SYSTEM_AUDIT_OBJECT_ACE;
+                    ObjectType, InheritedObjectType, SidStart)
+                }
                 AceType::SYSTEM_MANDATORY_LABEL_ACE_TYPE => {
-                    get_sid!(self; SYSTEM_MANDATORY_LABEL_ACE)
+                    get_sid!(self; Security::SYSTEM_MANDATORY_LABEL_ACE)
                 }
                 AceType::SYSTEM_SCOPED_POLICY_ID_ACE_TYPE => {
-                    get_sid!(self; SYSTEM_SCOPED_POLICY_ID_ACE)
+                    get_sid!(self; Security::SYSTEM_SCOPED_POLICY_ID_ACE)
                 }
                 AceType::SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE => None, // TODO: Resource attributes are more complex
             }
@@ -181,9 +188,9 @@ mod test {
         ];
 
         let test_setups = [
-            ("(ML;;", ";;;LW)", winapi::um::winnt::WinLowLabelSid),
-            ("(ML;;", ";;;ME)", winapi::um::winnt::WinMediumLabelSid),
-            ("(ML;;", ";;;HI)", winapi::um::winnt::WinHighLabelSid),
+            ("(ML;;", ";;;LW)", Security::WinLowLabelSid),
+            ("(ML;;", ";;;ME)", Security::WinMediumLabelSid),
+            ("(ML;;", ";;;HI)", Security::WinHighLabelSid),
         ];
 
         for (sddl1, sddl2, sid_type) in test_setups.iter() {

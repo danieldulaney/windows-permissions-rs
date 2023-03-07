@@ -11,7 +11,7 @@
 pub fn GetSidLengthRequired(sub_auth_count: u8) -> usize {
     // Assumptions:
     // - None. The function is guaranteed by the WinAPI not to fail
-    unsafe { winapi::um::securitybaseapi::GetSidLengthRequired(sub_auth_count) as usize }
+    unsafe { windows_sys::Win32::Security::GetSidLengthRequired(sub_auth_count) as usize }
 }
 
 #[cfg(test)]

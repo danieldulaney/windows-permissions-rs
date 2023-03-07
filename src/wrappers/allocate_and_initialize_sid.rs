@@ -60,8 +60,8 @@ pub fn AllocateAndInitializeSid(id_auth: [u8; 6], sub_auths: &[u32]) -> io::Resu
     let sa_7 = if sub_auths.len() > 7 { sub_auths[7] } else { 0 };
 
     let result = unsafe {
-        winapi::um::securitybaseapi::AllocateAndInitializeSid(
-            &mut winapi::um::winnt::SID_IDENTIFIER_AUTHORITY { Value: id_auth },
+        windows_sys::Win32::Security::AllocateAndInitializeSid(
+            &mut windows_sys::Win32::Security::SID_IDENTIFIER_AUTHORITY { Value: id_auth },
             sub_auths.len() as u8,
             sa_0,
             sa_1,
