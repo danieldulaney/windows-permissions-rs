@@ -1,10 +1,11 @@
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+
 use crate::constants::{SeObjectType, SecurityInformation};
 use crate::utilities::buf_from_os;
 use crate::{LocalBox, SecurityDescriptor};
 use std::ffi::OsStr;
 use std::io;
 use std::ptr::{null_mut, NonNull};
-use winapi::shared::winerror::ERROR_SUCCESS;
 
 /// Wraps [`GetNamedSecurityInfoW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getnamedsecurityinfow)
 ///
@@ -22,9 +23,9 @@ pub fn GetNamedSecurityInfo<S: AsRef<OsStr> + ?Sized>(
     let mut sd = null_mut();
 
     let result_code = unsafe {
-        winapi::um::aclapi::GetNamedSecurityInfoW(
+        windows_sys::Win32::Security::Authorization::GetNamedSecurityInfoW(
             name.as_ptr(),
-            obj_type as u32,
+            obj_type as _,
             sec_info.bits(),
             null_mut(),
             null_mut(),

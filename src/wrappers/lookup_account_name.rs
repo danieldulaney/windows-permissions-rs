@@ -4,10 +4,7 @@ use std::{
     ptr::null,
 };
 
-use winapi::um::{
-    winbase::LookupAccountNameW,
-    winnt::{SID_NAME_USE, WCHAR},
-};
+use windows_sys::Win32::Security::{LookupAccountNameW, SID_NAME_USE};
 
 use crate::{
     constants::SidNameUse,
@@ -32,9 +29,11 @@ const MAX_RETRIES: usize = 5;
 /// # use windows_permissions::Sid;
 /// # use std::ffi::OsStr;
 /// #
+/// use windows_sys::Win32::Security::WinWorldSid;
+///
 /// // A well-known SID
 /// let (sid, _, name_use) = LookupAccountName(Option::<&OsStr>::None, "Everyone").unwrap();
-/// let win_world_sid = Sid::well_known_sid(winapi::um::winnt::WinWorldSid).unwrap();
+/// let win_world_sid = Sid::well_known_sid(WinWorldSid).unwrap();
 ///
 /// assert_eq!(Box::as_ref(&sid), win_world_sid.as_ref());
 /// assert_eq!(name_use, SidNameUse::SidTypeWellKnownGroup);
@@ -46,7 +45,7 @@ pub fn LookupAccountName(
 ) -> io::Result<(Box<Sid>, OsString, SidNameUse)> {
     // Buffers to hold the SID itself, the DOM name, and the SID name use
     let mut sid_buf: Vec<u8> = vec![0; BUFFER_SIZE];
-    let mut ref_dom_name_buf: Vec<WCHAR> = vec![0; BUFFER_SIZE];
+    let mut ref_dom_name_buf: Vec<u16> = vec![0; BUFFER_SIZE];
     let mut sid_name_use: SID_NAME_USE = 0;
 
     // Convert the system name and account name into buffers

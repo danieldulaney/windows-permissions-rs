@@ -1,9 +1,10 @@
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+
 use crate::constants::{SeObjectType, SecurityInformation};
 use crate::utilities::ptr_from_opt;
 use crate::{Acl, Sid};
 use std::io;
 use std::os::windows::io::AsRawHandle;
-use winapi::shared::winerror::ERROR_SUCCESS;
 
 /// Wraps [`SetSecurityInfo`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-setsecurityinfo)
 ///
@@ -20,9 +21,9 @@ pub fn SetSecurityInfo<H: AsRawHandle>(
     sacl: Option<&Acl>,
 ) -> io::Result<()> {
     let result_code = unsafe {
-        winapi::um::aclapi::SetSecurityInfo(
-            handle.as_raw_handle(),
-            obj_type as u32,
+        windows_sys::Win32::Security::Authorization::SetSecurityInfo(
+            handle.as_raw_handle() as isize,
+            obj_type as _,
             sec_info.bits(),
             ptr_from_opt(owner) as *mut _,
             ptr_from_opt(group) as *mut _,

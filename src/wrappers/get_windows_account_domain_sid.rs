@@ -1,6 +1,7 @@
+use windows_sys::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER;
+
 use crate::{wrappers, LocalBox, Sid};
 use std::io;
-use winapi::shared::winerror::ERROR_INSUFFICIENT_BUFFER;
 
 /// Wraps [`GetWindowsAccountDomainSid`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getwindowsaccountdomainsid)
 #[allow(non_snake_case)]
@@ -14,7 +15,7 @@ pub fn GetWindowsAccountDomainSid(sid: &Sid) -> io::Result<LocalBox<Sid>> {
         buffer = vec![0; len as usize];
 
         let result = unsafe {
-            winapi::um::securitybaseapi::GetWindowsAccountDomainSid(
+            windows_sys::Win32::Security::GetWindowsAccountDomainSid(
                 sid as *const _ as *mut _,
                 buffer.as_mut_ptr() as *mut _,
                 &mut len,
@@ -43,10 +44,11 @@ pub fn GetWindowsAccountDomainSid(sid: &Sid) -> io::Result<LocalBox<Sid>> {
 
 #[cfg(test)]
 mod test {
+    use windows_sys::Win32::Foundation::ERROR_NON_ACCOUNT_SID;
+
     use super::*;
 
     use crate::utilities;
-    use winapi::shared::winerror::ERROR_NON_ACCOUNT_SID;
 
     #[test]
     fn current_process_has_domain() {
@@ -57,7 +59,7 @@ mod test {
     fn well_known_sid_has_no_domain() {
         assert_eq!(
             GetWindowsAccountDomainSid(
-                &Sid::well_known_sid(winapi::um::winnt::WinWorldSid).unwrap()
+                &Sid::well_known_sid(windows_sys::Win32::Security::WinWorldSid).unwrap()
             )
             .unwrap_err()
             .raw_os_error(),

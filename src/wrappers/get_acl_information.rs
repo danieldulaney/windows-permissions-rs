@@ -1,6 +1,7 @@
+use windows_sys::Win32::Security::ACL_SIZE_INFORMATION;
+
 use crate::Acl;
 use std::io;
-use winapi::um::winnt::ACL_SIZE_INFORMATION;
 
 /// Wraps [`GetAclInformation`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getaclinformation)
 ///
@@ -18,11 +19,11 @@ pub fn GetAclInformationSize(acl: &Acl) -> io::Result<ACL_SIZE_INFORMATION> {
     let info_size = std::mem::size_of::<ACL_SIZE_INFORMATION>() as u32;
 
     let result = unsafe {
-        winapi::um::securitybaseapi::GetAclInformation(
+        windows_sys::Win32::Security::GetAclInformation(
             acl as *const _ as *mut _,
             &mut info as *mut _ as *mut _,
             info_size,
-            winapi::um::winnt::AclSizeInformation,
+            windows_sys::Win32::Security::AclSizeInformation,
         )
     };
 

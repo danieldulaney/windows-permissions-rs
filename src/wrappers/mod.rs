@@ -82,11 +82,12 @@ pub use set_security_info::SetSecurityInfo;
 
 #[cfg(test)]
 mod test {
+    use windows_sys::Win32::Security::{WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
+
     use super::*;
 
     use crate::Sid;
     use std::ffi::OsString;
-    use winapi::um::winnt::{WinCapabilityMusicLibrarySid, WinLocalSid, WinWorldSid};
 
     #[test]
     fn construct_and_read_sids() {

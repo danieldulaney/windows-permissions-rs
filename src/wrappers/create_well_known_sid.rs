@@ -11,7 +11,7 @@ use std::ptr::null_mut;
 ///
 /// ```
 /// use windows_permissions::{wrappers, Sid, LocalBox};
-/// use winapi::um::winnt::WinWorldSid;
+/// use windows_sys::Win32::Security::WinWorldSid;
 ///
 /// let win_world_sid = wrappers::CreateWellKnownSid(WinWorldSid, None).unwrap();
 /// let another_sid = "S-1-1-0".parse().unwrap();
@@ -19,7 +19,7 @@ use std::ptr::null_mut;
 /// assert_eq!(win_world_sid, another_sid);
 /// ```
 #[allow(non_snake_case)]
-pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result<LocalBox<Sid>> {
+pub fn CreateWellKnownSid(sid_type: i32, domain_sid: Option<&Sid>) -> io::Result<LocalBox<Sid>> {
     // Optimistically reserve enough space for a fairly large SID
     let mut sid_len = wrappers::GetSidLengthRequired(8) as u32;
 
@@ -33,7 +33,7 @@ pub fn CreateWellKnownSid(sid_type: u32, domain_sid: Option<&Sid>) -> io::Result
     let new_sid: LocalBox<Sid> = unsafe { LocalBox::try_allocate(true, sid_len as usize)? };
 
     let result = unsafe {
-        winapi::um::securitybaseapi::CreateWellKnownSid(
+        windows_sys::Win32::Security::CreateWellKnownSid(
             sid_type,
             domain_sid_ptr,
             new_sid.as_ptr() as *mut _,

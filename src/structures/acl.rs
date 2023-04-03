@@ -1,8 +1,9 @@
+use windows_sys::Win32::Foundation::ERROR_INVALID_PARAMETER;
+use windows_sys::Win32::Security::ACL;
+
 use crate::{constants, wrappers, Ace, Trustee};
 use std::fmt;
 use std::io;
-use winapi::shared::winerror::ERROR_INVALID_PARAMETER;
-use winapi::um::winnt::ACL;
 
 /// An entry in an access control list (ACL).
 #[repr(C)]
@@ -105,7 +106,7 @@ impl Acl {
     /// assert_eq!(complex_acl_sd.dacl().unwrap().revision_level(), ACL_REVISION_DS);
     /// ```
     pub fn revision_level(&self) -> constants::AclRevision {
-        constants::AclRevision::from_raw(self.internal_type_reference().AclRevision)
+        constants::AclRevision::from_raw(self.internal_type_reference().AclRevision as u32)
             .expect("Unknown revision level")
     }
 }

@@ -7,7 +7,7 @@ use crate::Sid;
 ///
 /// ```
 /// use windows_permissions::{Sid, LocalBox, wrappers::EqualSid};
-/// use winapi::um::winnt::WinCreatorGroupSid;
+/// use windows_sys::Win32::Security::WinCreatorGroupSid;
 ///
 /// let sid1: LocalBox<Sid> = "S-1-3-1".parse().unwrap();
 /// let sid2 = Sid::well_known_sid(WinCreatorGroupSid).unwrap();
@@ -20,7 +20,7 @@ use crate::Sid;
 #[allow(non_snake_case)]
 pub fn EqualSid(sid1: &Sid, sid2: &Sid) -> bool {
     (unsafe {
-        winapi::um::securitybaseapi::EqualSid(
+        windows_sys::Win32::Security::EqualSid(
             sid1 as *const _ as *mut _,
             sid2 as *const _ as *mut _,
         )
