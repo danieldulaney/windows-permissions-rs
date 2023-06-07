@@ -1,9 +1,10 @@
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+
 use crate::constants::{SeObjectType, SecurityInformation};
 use crate::utilities::{buf_from_os, ptr_from_opt};
 use crate::{Acl, Sid};
 use std::ffi::OsStr;
 use std::io;
-use winapi::shared::winerror::ERROR_SUCCESS;
 
 /// Wraps [`SetNamedSecurityInfoW`](https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-setnamedsecurityinfow)
 #[allow(non_snake_case)]
@@ -19,9 +20,9 @@ pub fn SetNamedSecurityInfo<S: AsRef<OsStr> + ?Sized>(
     let name = buf_from_os(name);
 
     let result_code = unsafe {
-        winapi::um::aclapi::SetNamedSecurityInfoW(
+        windows_sys::Win32::Security::Authorization::SetNamedSecurityInfoW(
             name.as_ptr() as *mut _,
-            obj_type as u32,
+            obj_type as _,
             sec_info.bits(),
             ptr_from_opt(owner) as *mut _,
             ptr_from_opt(group) as *mut _,

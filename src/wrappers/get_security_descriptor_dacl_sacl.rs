@@ -1,7 +1,8 @@
+use windows_sys::Win32::Security::ACL;
+
 use crate::{wrappers, Acl, SecurityDescriptor};
 use std::io;
 use std::ptr::null_mut;
-use winapi::um::winnt::PACL;
 
 macro_rules! get_security_descriptor_acl {
     ($f:ident; msdn: $msdn:expr) => {
@@ -12,11 +13,11 @@ macro_rules! get_security_descriptor_acl {
         #[allow(non_snake_case)]
         pub fn $f(sd: &SecurityDescriptor) -> io::Result<Option<&Acl>> {
             let mut present = 0i32;
-            let mut acl_ptr: PACL = null_mut();
+            let mut acl_ptr: *mut ACL = null_mut();
             let mut defaulted = 0i32;
 
             let result = unsafe {
-                winapi::um::securitybaseapi::$f(
+                windows_sys::Win32::Security::$f(
                     sd as *const _ as *mut _,
                     &mut present,
                     &mut acl_ptr,

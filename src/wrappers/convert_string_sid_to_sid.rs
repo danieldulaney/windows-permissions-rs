@@ -23,7 +23,9 @@ pub fn ConvertStringSidToSid<S: AsRef<OsStr> + ?Sized>(string: &S) -> io::Result
     let buf = buf_from_os(string);
     let mut ptr = null_mut();
 
-    let result = unsafe { winapi::shared::sddl::ConvertStringSidToSidW(buf.as_ptr(), &mut ptr) };
+    let result = unsafe {
+        windows_sys::Win32::Security::Authorization::ConvertStringSidToSidW(buf.as_ptr(), &mut ptr)
+    };
 
     if result != 0 {
         // Success

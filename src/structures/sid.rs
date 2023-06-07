@@ -44,14 +44,14 @@ impl Sid {
     ///
     /// ```
     /// use windows_permissions::{Sid, LocalBox};
-    /// use winapi::um::winnt::WinWorldSid;
+    /// use windows_sys::Win32::Security::WinWorldSid;
     ///
     /// let win_world_sid = Sid::well_known_sid(WinWorldSid).unwrap();
     /// let another_sid = "S-1-1-0".parse().unwrap();
     ///
     /// assert_eq!(win_world_sid, another_sid);
     /// ```
-    pub fn well_known_sid(well_known_sid_type: u32) -> io::Result<LocalBox<Sid>> {
+    pub fn well_known_sid(well_known_sid_type: i32) -> io::Result<LocalBox<Sid>> {
         wrappers::CreateWellKnownSid(well_known_sid_type, None)
     }
 
@@ -192,7 +192,7 @@ impl fmt::Display for Sid {
         write!(
             fmt,
             "{}",
-            wrappers::ConvertSidToStringSid(&self)
+            wrappers::ConvertSidToStringSid(self)
                 .expect("Passed a safe Sid to ConvertSidToStringSid but got an error")
                 .to_string_lossy()
         )

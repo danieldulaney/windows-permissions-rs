@@ -19,7 +19,10 @@ use std::ptr::null_mut;
 pub fn ConvertSidToStringSid(sid: &Sid) -> io::Result<OsString> {
     let mut buf_ptr: *mut u16 = null_mut();
     let result = unsafe {
-        winapi::shared::sddl::ConvertSidToStringSidW(sid as *const _ as *mut _, &mut buf_ptr)
+        windows_sys::Win32::Security::Authorization::ConvertSidToStringSidW(
+            sid as *const _ as *mut _,
+            &mut buf_ptr,
+        )
     };
 
     if result == 0 {
@@ -32,7 +35,7 @@ pub fn ConvertSidToStringSid(sid: &Sid) -> io::Result<OsString> {
 
         let os_string = utilities::os_from_buf(slice_with_nul);
 
-        unsafe { winapi::um::winbase::LocalFree(buf_ptr as *mut _) };
+        unsafe { windows_sys::Win32::System::Memory::LocalFree(buf_ptr as isize) };
 
         Ok(os_string)
     }

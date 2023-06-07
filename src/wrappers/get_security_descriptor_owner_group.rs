@@ -1,7 +1,7 @@
 use crate::{SecurityDescriptor, Sid};
+use std::ffi::c_void;
 use std::io;
 use std::ptr::{null_mut, NonNull};
-use winapi::ctypes::c_void;
 
 /// Wraps [`GetSecurityDescriptorOwner`](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptorowner)
 #[allow(non_snake_case)]
@@ -10,7 +10,7 @@ pub fn GetSecurityDescriptorOwner(sd: &SecurityDescriptor) -> io::Result<Option<
     let mut _sid_default: i32 = 0;
 
     let result = unsafe {
-        winapi::um::securitybaseapi::GetSecurityDescriptorOwner(
+        windows_sys::Win32::Security::GetSecurityDescriptorOwner(
             sd as *const _ as *mut _,
             &mut sid_ptr,
             &mut _sid_default,
@@ -32,7 +32,7 @@ pub fn GetSecurityDescriptorGroup(sd: &SecurityDescriptor) -> io::Result<Option<
     let mut _sid_default: i32 = 0;
 
     let result = unsafe {
-        winapi::um::securitybaseapi::GetSecurityDescriptorGroup(
+        windows_sys::Win32::Security::GetSecurityDescriptorGroup(
             sd as *const _ as *mut _,
             &mut sid_ptr,
             &mut _sid_default,

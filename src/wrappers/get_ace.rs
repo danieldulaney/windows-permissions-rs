@@ -15,7 +15,7 @@ pub fn GetAce(acl: &Acl, index: u32) -> io::Result<&Ace> {
     let mut ace = null_mut();
 
     let result =
-        unsafe { winapi::um::securitybaseapi::GetAce(acl as *const _ as *mut _, index, &mut ace) };
+        unsafe { windows_sys::Win32::Security::GetAce(acl as *const _ as *mut _, index, &mut ace) };
 
     if result == 0 {
         // Failed

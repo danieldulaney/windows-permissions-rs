@@ -33,7 +33,7 @@
 
 #[macro_use]
 extern crate bitflags;
-extern crate winapi;
+extern crate windows_sys;
 
 #[cfg(target_os = "windows")]
 pub mod constants;
